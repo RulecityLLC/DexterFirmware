@@ -1,0 +1,16 @@
+# avr_aux-config-version.cmake - checks version: major must match, minor must be less than or equal
+# from https://foonathan.net/2016/03/cmake-install/
+
+set(PACKAGE_VERSION @AVR_AUX_VERSION@)
+
+if("${PACKAGE_FIND_VERSION_MAJOR}" EQUAL "@AVR_AUX_VERSION_MAJOR@")
+    if ("${PACKAGE_FIND_VERSION_MINOR}" EQUAL "@AVR_AUX_VERSION_MINOR@")
+        set(PACKAGE_VERSION_EXACT TRUE)
+    elseif("${PACKAGE_FIND_VERSION_MINOR}" LESS "@AVR_AUX_VERSION_MINOR@")
+        set(PACKAGE_VERSION_COMPATIBLE TRUE)
+    else()
+        set(PACKAGE_VERSION_UNSUITABLE TRUE)
+    endif()
+else()
+    set(PACKAGE_VERSION_UNSUITABLE TRUE)
+endif()
