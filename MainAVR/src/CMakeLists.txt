@@ -85,6 +85,8 @@ set(AVR_MAIN_SRCS
 SET(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
 
 add_executable(avr_main ${AVR_MAIN_SRCS} )
+
+# ending in .elf helps emphasize what is different about this output file from the .hex and .bin files that we generate later
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
 
 # convert ELF file into binary format that Dexter's bootloader uses
@@ -97,17 +99,18 @@ add_custom_command(
 	COMMAND ${CMAKE_OBJCOPY} -I ihex ${PROJECT_NAME}.hex -O binary vldp-avr.bin
 )
 
+# pull in dependencies
 find_package(ldp_in 1.0 REQUIRED)
 target_link_libraries(avr_main PUBLIC ldp_in)
 
 find_package(ldp_abst 1.0 REQUIRED)
 target_link_libraries(avr_main PUBLIC ldp_abst)
 
+# to help debug this cmake file.  no harm leaving it here.
 message("cmake src dir is ${CMAKE_SOURCE_DIR}")
 message("cmake runtime out dir is ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 message("cmake binary dir is ${CMAKE_BINARY_DIR}")
+message("cmake current binary dir is ${CMAKE_CURRENT_BINARY_DIR}")
 
-#install(FILES ${AVR_MAIN_PUBLIC_INCLUDE} DESTINATION "${include_dest}/avr-main")
-
-# goes into lib_dest so that Debug/Release is taken into account
-#install(TARGETS avr_main EXPORT avr_main DESTINATION "${lib_dest}")
+# we want the final binary to be installed in the default binary folder, because that's where a user would expect to find it
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/vldp-avr.bin TYPE BIN)
