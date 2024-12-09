@@ -9,3 +9,5 @@ project(bootloader)
 set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory("src")
+
+install(DIRECTORY scripts TYPE BIN)
