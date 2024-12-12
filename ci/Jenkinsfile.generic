@@ -1,0 +1,45 @@
+pipeline {
+    agent { label "${env.JENKINS_AGENT}" }
+
+        environment {
+                CMAKE_BUILD_TYPE='Release'
+                MAKE_THREADS='4'
+        }
+
+    stages {
+        stage('Setup') {
+            steps {
+		echo "JENKINS_AGENT_PLATFORM is ${env.JENKINS_AGENT_PLATFORM}"
+		copyArtifacts(projectName: "laserdiscPlayerCmdInterpreters_${env.JENKINS_AGENT_PLATFORM}")
+		copyArtifacts(projectName: "laserdiscPlayerAbstract_${env.JENKINS_AGENT_PLATFORM}")
+		sh 'rm -rf install'
+		sh 'mkdir install'
+		sh 'cd install && tar xvfz ../ci/ldpInInstall.tar.gz'
+		sh 'cd install && tar xvfz ../ci/ldpAbstInstall.tar.gz'
+		sh "echo Workspace is ${env.WORKSPACE}"
+            }
+        }	
+        stage('Build Main') {
+            steps {
+		sh 'rm -rf build'
+		sh 'mkdir build'
+		sh "cd build && cmake ${env.EXTRA_ARGS_MAIN} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_SYSTEM_PREFIX_PATH=${env.WORKSPACE}/install -DCMAKE_INSTALL_PREFIX=${env.WORKSPACE}/install/dexter_firmware -DCMAKE_SYSTEM_NAME=$CMAKE_SYSTEM_NAME -DCMAKE_C_COMPILER=$CMAKE_C_COMPILER -DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER -DCMAKE_AR=$CMAKE_AR -DCMAKE_RANLIB=$CMAKE_RANLIB ../MainAVR"
+		sh 'cd build && make VERBOSE=1 install -j ${MAKE_THREADS}'
+            }
+        }
+        stage('Build Aux') {
+            steps {
+                sh 'rm -rf build'
+		sh 'mkdir build'
+		sh "cd build && cmake  ${env.EXTRA_ARGS_AUX} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_SYSTEM_PREFIX_PATH=${env.WORKSPACE}/install -DCMAKE_INSTALL_PREFIX=${env.WORKSPACE}/install/dexter_firmware -DCMAKE_SYSTEM_NAME=$CMAKE_SYSTEM_NAME -DCMAKE_C_COMPILER=$CMAKE_C_COMPILER -DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER -DCMAKE_AR=$CMAKE_AR -DCMAKE_RANLIB=$CMAKE_RANLIB ../AuxAVR"
+		sh 'cd build && make VERBOSE=1 install -j ${MAKE_THREADS}'
+            }
+        }
+	stage('Package') {
+            steps {
+                sh 'cd install && tar cvfz ../ci/dexterFirmwareInstall.tar.gz dexter_firmware'
+                archiveArtifacts artifacts: 'ci/dexterFirmwareInstall.tar.gz', onlyIfSuccessful: true, fingerprint: true
+            }
+        }
+    }
+}
