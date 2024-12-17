@@ -1,0 +1,18 @@
+644p:
+
+E: FC
+H: 9C
+L: F7
+
+lock: 2F (EF)
+
+
+
+
+328p:
+
+E: FC
+H: DA
+L: F7  (should be FF for low-power osc to replace full swing, this is confirmed)
+
+lock: 2F (EF)
