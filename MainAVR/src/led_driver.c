@@ -163,8 +163,9 @@ uint8_t LDPTypeToLED(LDPType type)
 	case LDP_LDP1450:
 		res = LED_LDP1450;
 		break;
-	case LDP_LDP1000A:
-		res = LED_LDP1000A;
+	case LDP_LDP1000A:	// before 'Other' had multiple modes, it was LDP1000A so we'll leave this here for safety reasons
+	case LDP_OTHER:
+		res = LED_OTHER;
 		break;
 	case LDP_VIP9500SG:
 		res = LED_VIP9500SG;

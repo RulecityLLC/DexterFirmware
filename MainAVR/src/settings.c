@@ -99,7 +99,8 @@ settings_bad:
 	// fill in default values since the CRC failed
 
 	p8Buf[0] = p8Buf[1] = 0;	// persistent identifier
-	p8Buf[2] = LDP_LDV1000;	// default player
+	//p8Buf[2] = LDP_LDV1000;	// default player
+	p8Buf[2] = LDP_OTHER;	// DO NOT CHECK THIS IN!
 	p8Buf[3] = 0 | (1 << 6);	// behavior is authentic with auto-detection enabled
 #ifdef DEBUG
 	p8Buf[3] |= (1 << 3);	// enable diagnose mode
@@ -494,9 +495,10 @@ void OnModePressed()
 		next = LDP_VIP9500SG;
 		break;
 	case LDP_VIP9500SG:
-		next = LDP_LDP1000A;	// TODO : change this to 'other'
+		next = LDP_OTHER;
 		break;
-	case LDP_LDP1000A:
+	case LDP_LDP1000A:	// before 'Other' had multiple modes, it was LDP1000A so we'll leave this here for safety reasons
+	case LDP_OTHER:
 		next = LDP_PR8210;
 		break;
 	case LDP_PR8210:

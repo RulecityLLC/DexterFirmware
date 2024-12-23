@@ -1,0 +1,8 @@
+mutators:
+ - cxx_all
+excludePaths: # support regex
+ - gtest
+ - gmock
+ - tests.cpp # any file ending in *tests.cpp is excluded
+timeout: 10000 # 10 seconds
+quiet: false # enables additional logging
