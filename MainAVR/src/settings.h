@@ -28,7 +28,9 @@ typedef enum
 	LDP_LDV8000 = 10,
 	LDP_LDP1450 = 11,
 	LDP_LDP1000A = 12,
-	LDP_VIP9500SG = 13
+	LDP_VIP9500SG = 13,
+	LDP_LD700 = 14,
+	LDP_OTHER = 15	// this enum is useful to trigger auto-detection of which adapter is plugged in
 } LDPType;
 
 typedef enum

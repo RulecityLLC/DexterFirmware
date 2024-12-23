@@ -22,6 +22,7 @@
 #include "pr8210-main.h"
 #include "pr7820-main.h"
 #include "vip9500sg-main.h"
+#include "ld700-main.h"
 #include "timer-global.h"
 
 // whether we need to restart the active laserdisc player
@@ -229,6 +230,37 @@ int main (void)
 			break;
 		case LDP_VIP9500SG:
 			vip9500sg_main_loop();
+			break;
+		case LDP_OTHER:
+			// Other mode examines some pins to determine which adapter is plugged into DB25 port
+			// PC1 (DB12) and PC0 (DB11) values when read with pull-ups enabled
+			// 11: LDP-1000A
+			// 10: LD700 (Halcyon)
+			{
+				LDPType detectedType;
+				uint8_t u8DDRCSaved = DDRC;
+				uint8_t u8PORTCSaved = PORTC;
+				DDRC &= ~((1 << PC0) | (1 << PC1));	// go into input mode for these pins
+				PORTC |= ((1 << PC0) | (1 << PC1));	// enable pull-ups
+				
+				// if PC0 is connected to GND then it must be LD700 as that's the only player we currently support with that configuration
+				if ((PINC & (1 << PC0)) == 0)
+				{
+					detectedType = LDP_LD700;
+				}
+				// else the pin is raised, so the only player we currently support is LDP-1000A
+				else
+				{
+					detectedType = LDP_LDP1000A;
+				}
+				
+				// clean-up after ourselves
+				PORTC = u8PORTCSaved;
+				DDRC = u8DDRCSaved;
+				
+				if (detectedType == LDP_LDP1000A) ldp1000_main_loop(LDP_LDP1000A);
+				else ld700_main_loop();
+			}
 			break;
 		}
 

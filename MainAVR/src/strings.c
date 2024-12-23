@@ -6,6 +6,7 @@
 const char strDefault[] PROGMEM = "Default ";
 const char strSettingsApplied[] PROGMEM = "Settings applied";
 const char strUnsupported[] PROGMEM = "Unsupported";
+const char strLD700[] PROGMEM = "LD700 ";
 const char strLDP1000A[] PROGMEM = "LDP-1000A ";
 const char strLDP1450[] PROGMEM = "LDP-1450 ";
 const char strLDV1000[] PROGMEM = "LD-V1000 ";
@@ -64,6 +65,7 @@ PGM_P const string_table[] PROGMEM =
     strDefault,
     strSettingsApplied,
     strUnsupported,
+	strLD700,
 	strLDP1000A,
 	strLDP1450,
     strLDV1000,

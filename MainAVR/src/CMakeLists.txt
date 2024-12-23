@@ -17,6 +17,9 @@ set(AVR_MAIN_SRCS
 	idle.h
 	ldp_stub.c
 	ldp_stub.h
+	ld700-main.c
+	ld700-main.h
+	ld700-main-asm.s
 	ldp1000_callbacks.c
 	ldp1000_callbacks.h
 	ldp1000-main.c
@@ -87,16 +90,16 @@ SET(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
 add_executable(avr_main ${AVR_MAIN_SRCS} )
 
 # ending in .elf helps emphasize what is different about this output file from the .hex and .bin files that we generate later
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "vldp-avr.elf")
 
 # convert ELF file into binary format that Dexter's bootloader uses
 add_custom_command(
-    TARGET avr_main
-    POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} -O ihex -R .eeprom -R .lock -R .signature ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
-	
+	TARGET avr_main
+	POST_BUILD
+	COMMAND ${CMAKE_OBJCOPY} -O ihex -R .eeprom -R .lock -R .signature vldp-avr.elf vldp-avr.hex
+
 	# vldp-avr.bin is the name of the file that Dexter's media server expects
-	COMMAND ${CMAKE_OBJCOPY} -I ihex ${PROJECT_NAME}.hex -O binary vldp-avr.bin
+	COMMAND ${CMAKE_OBJCOPY} -I ihex vldp-avr.hex -O binary vldp-avr.bin
 )
 
 # pull in dependencies
@@ -114,3 +117,9 @@ message("cmake current binary dir is ${CMAKE_CURRENT_BINARY_DIR}")
 
 # we want the final binary to be installed in the default binary folder, because that's where a user would expect to find it
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/vldp-avr.bin TYPE BIN)
+
+# the .hex file may be useful for development so we'll install that too
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/vldp-avr.hex TYPE BIN)
+
+# the .elf file may be useful for development so we'll install that too
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/vldp-avr.elf TYPE BIN)
