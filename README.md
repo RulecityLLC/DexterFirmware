@@ -40,3 +40,26 @@ This is the firmware for the auxiliary microcontroller on the Dexter PCB.
 This is the bootloader for the main microcontroller on the Dexter PCB.
 ## bootloader-vbi-inject.hex
 This is the bootloader for the auxiliary microcontroller on the Dexter PCB.
+
+# Advanced
+
+## To use C compiler to generate assembly language source code
+
+Use "make VERBOSE=1" to get the command line that the C compiler uses to build the C code that you want to convert to assembly language.
+For example, you may see something like this:
+
+```
+cd /dexter-firmware/MainAVR/build-avr-release/src && /usr/bin/avr-gcc  -isystem /usr/local/include/ldp_in-1.0 -isystem /usr/local/include/ldp_abst-1.0 -mmcu=atmega644p -Wall -gdwarf-2 -std=gnu99 -DREV3 -DF_CPU=18432000UL -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -O3 -DNDEBUG -MD -MT src/CMakeFiles/avr_main.dir/ld700-main.c.o -MF CMakeFiles/avr_main.dir/ld700-main.c.o.d -o CMakeFiles/avr_main.dir/ld700-main.c.o -c /dexter-firmware/MainAVR/src/ld700-main.c
+```
+
+Add a -S somewhere on the command line and change the output file that ends in .o to .s .
+For example,
+```
+cd /dexter-firmware/MainAVR/build-avr-release/src && /usr/bin/avr-gcc  -isystem /usr/local/include/ldp_in-1.0 -isystem /usr/local/include/ldp_abst-1.0 -mmcu=atmega644p -Wall -gdwarf-2 -std=gnu99 -DREV3 -DF_CPU=18432000UL -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -O3 -DNDEBUG -MD -MT src/CMakeFiles/avr_main.dir/ld700-main.c.o -MF CMakeFiles/avr_main.dir/ld700-main.c.o.d -S -o CMakeFiles/avr_main.dir/ld700-main.c.s -c /dexter-firmware/MainAVR/src/ld700-main.c
+```
+
+Now you can use your favorite text editor to examine the generated assembly language.
+
+```
+nano -w CMakeFiles/avr_main.dir/ld700-main.c.s
+```
