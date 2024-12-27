@@ -8,7 +8,7 @@
 #include "serial.h"	// for debug
 #include "serial2.h"	// to disable interrupt
 #include "strings.h"
-#include "vldp-avr.h"	// for settings changed global
+#include "vldp-avr.h"	// for restart player global
 #include "led_driver.h"
 #include "common-ldp.h"
 #include "deferred_eeprom_write.h"
@@ -497,7 +497,8 @@ void OnModePressed()
 	case LDP_VIP9500SG:
 		next = LDP_OTHER;
 		break;
-	case LDP_LDP1000A:	// before 'Other' had multiple modes, it was LDP1000A so we'll leave this here for safety reasons
+	case LDP_LDP1000A:	// these modes could be differentiated internally, but they all share the 'Other' LED on the PCB so will all advance to the same destination when mode is pressed
+	case LDP_LD700:
 	case LDP_OTHER:
 		next = LDP_PR8210;
 		break;

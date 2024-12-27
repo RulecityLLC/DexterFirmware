@@ -231,8 +231,11 @@ int main (void)
 		case LDP_VIP9500SG:
 			vip9500sg_main_loop();
 			break;
+		case LDP_LD700:
+			ld700_main_loop();
+			break;
 		case LDP_OTHER:
-			// Other mode examines some pins to determine which adapter is plugged into DB25 port
+			// 'Other' mode examines some pins to determine which adapter is plugged into the DB25 port
 			// PC1 (DB12) and PC0 (DB11) values when read with pull-ups enabled
 			// 11: LDP-1000A
 			// 10: LD700 (Halcyon)
