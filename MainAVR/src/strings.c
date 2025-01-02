@@ -28,6 +28,7 @@ const char strPlaying[] PROGMEM = "Playing";
 const char strCmdPlay[] PROGMEM = "Cmd: Play";
 const char strCmdPause[] PROGMEM = "Cmd: Pause";
 const char strCmdStop[] PROGMEM = "Cmd: Stop";
+const char strCmdEject[] PROGMEM = "Cmd: Eject";
 const char strCmdStep[] PROGMEM = "Cmd: Still-Step";
 const char strCmdSeek[] PROGMEM = "Cmd: Seek to frame %u";	// NOTE : this will assume frame number is 16-bit so will display incorrect results for any number over 2^16
 const char strLengthMismatch[] PROGMEM = "Length mismatch";
@@ -87,6 +88,7 @@ PGM_P const string_table[] PROGMEM =
 	strCmdPlay,
 	strCmdPause,
 	strCmdStop,
+	strCmdEject,
 	strCmdStep,
 	strCmdSeek,
 	strLengthMismatch,

@@ -1,11 +1,11 @@
 #include <avr/io.h> 
-#include <avr/interrupt.h>
+//#include <avr/interrupt.h>
 #include <string.h>
 #include "vldp-avr.h"
 #include <ldp-abst/ldpc.h>
 #include <ldp-in/ld700-interpreter.h>
 #include "ld700-common.h"
-//#include "ld700-callbacks.h"
+#include "ld700-callbacks.h"
 #include "protocol.h"
 #include "settings.h"
 #include "strings.h"
@@ -19,6 +19,22 @@
 #include "common-ldp.h"	// for video callback definition
 
 /////////////////////////////////////////////////////////////////
+
+typedef struct
+{
+	uint16_t u16CyclesTilTimeout;	// if we go this many cycles without a change in the line, then something is wrong and we'll retry
+	uint16_t u16CyclesMin;			// if the EXT_CTRL' signal changes before this many cycles has elapsed, then something is wrong and we'll retry
+	uint8_t u8ExpectedSignalChange;	// the expected EXT_CTRL' signal change that 'signals' the end of the current stage
+} ld700_cycles;
+
+// used by ISR to validate that the incoming EXT_CTRL' pulses conform to the correct cycle timing
+ld700_cycles g_ld700_cycles[4] =
+{
+	{0, 0, 0},	// before the leader begins (the pulse stays high during idle times). signal goes low (0) at the end of this stage.
+	{CYCLES_TIL_8MS_TIMEOUT, CYCLES_8MS_MIN, 1},	// for when leader goes low for 8ms. signal goes high (1) at the end of this stage.
+	{CYCLES_TIL_4MS_TIMEOUT, CYCLES_4MS_MIN, 0},	// for when leader goes high for 4ms.  signal goes low (0) at the end of this stage.
+	{CYCLES_TIL_TIMEOUT, 0, 0}	// for when we are receiving the actual bits.  the second and third value are ignored
+};
 
 // used only by ISR
 uint8_t g_ld700_u8ReceivingStage = STAGE_WAITING_FOR_8MS;
@@ -41,9 +57,10 @@ volatile uint8_t g_ld700_u8FinishedByteReady = 0;
 // EXT_CTRL is PA0
 #define LD700_EXT_CTRL (PINA & 1)
 
+/////////////////////////////////////////////////////////
+
 void ld700_main_loop()
 {
-//	uint8_t u8 = 0;
 	uint8_t u8NextField = 0;
 	
 	// so we can clean-up ourselves when we exit
@@ -59,13 +76,17 @@ void ld700_main_loop()
 	// Inputs
 	// PA0: EXT_CTRL'
 	// PA1: INT/EXT'
-	DDRA &= ~(1 << PA0) | (1 << PA1);
+	// PA2: Flip Disc Button (active low)
+	DDRA &= ~((1 << PA0) | (1 << PA1) | (1 << PA2));
 	
 	// Output
+	// PA5: Side 2 LED
+	// PA6: Side 1 LED (if SSR is enabled)
 	// PA7: EXT_ACK'
-	DDRA |= (1 << PA7);
 
-//	ld700_setup_callbacks();
+	DDRA |= ((1 << PA5)|(1 << PA6)|(1 << PA7));
+
+	ld700_setup_callbacks();
 
 	SETUP_LD700_INT();
 
@@ -78,7 +99,7 @@ void ld700_main_loop()
 		LOG(s);
 	}
 
-//	ld700i_reset();
+	ld700i_reset();
 
 	// to handle EXT_CTRL' timeouts
 	set_timer1_isr_callback(ld700_on_ext_ctrl_timeout);
@@ -98,20 +119,34 @@ void ld700_main_loop()
 			// if we have a message ready to process
 			if (g_ld700_u8FinishedByteReady)
 			{
+				// send received byte to interpreter
+				ld700i_write(g_ld700_u8FinishedByte, ld700_convert_status(ldpc_get_status()));
+				
+				// set flag back to 0 so we can detect when the next byte has come in
+				g_ld700_u8FinishedByteReady = 0;
+				
 				// if diagnostics mode is enabled log the incoming byte
 				if (IsDiagnosticsEnabledEeprom())
 				{
 					MediaServerSendRxLog(g_ld700_u8FinishedByte);
 				}
-
-				// TODO : send byte to interpreter
-				
-				// set flag back to 0 so we can detect when the next byte has come in
-				g_ld700_u8FinishedByteReady = 0;
 			}
 			
 			// use idle time to process low-priority tasks
 			idle_think();
+			
+			// if 'flip disc' button is being pressed
+			if ((PINA & (1 << PA2)) == 0)
+			{
+				LDPCStatus_t status = ldpc_get_status();
+				
+				// (for now) we only want to take action if the disc is stopped. This saves us from having to implement a debouncer, and also gives
+				//   a quick way to override Halcyon's persistent efforts to eject the disc.
+				if (status == LDPC_STOPPED)
+				{
+					ld700_close_tray();
+				}
+			}
 
  			// if user presses MODE button then abort (this is needed in case we have no video signal plugged in)
 			if (g_bRestartPlayer)
@@ -148,7 +183,7 @@ void ld700_main_loop()
 
 		// do interpreter stuff that happens after vblank.
 		// I put this after on_video_field so that performance of the video fields to the media server stays fairly constant.
-//		ld700i_on_vblank();
+		ld700i_on_vblank(ld700_convert_status(ldpc_get_status()));
 	}
 
 done:
@@ -162,18 +197,3 @@ done:
 	DDRA = u8DDRAStored;
 	PORTA = u8PORTAStored;
 }
-
-typedef struct
-{
-	uint16_t u16CyclesTilTimeout;
-	uint16_t u16CyclesMin;
-	uint8_t u8ExpectedSignalChange;
-} ld700_cycles;
-
-ld700_cycles g_ld700_cycles[4] =
-{
-	{0, 0, 0},
-	{CYCLES_TIL_8MS_TIMEOUT, CYCLES_8MS_MIN, 1},
-	{CYCLES_TIL_4MS_TIMEOUT, CYCLES_4MS_MIN, 0},
-	{CYCLES_TIL_TIMEOUT, 0, 0}	// second and third value are ignored
-};

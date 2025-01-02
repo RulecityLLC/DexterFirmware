@@ -17,6 +17,8 @@ set(AVR_MAIN_SRCS
 	idle.h
 	ldp_stub.c
 	ldp_stub.h
+	ld700-callbacks.c
+	ld700-callbacks.h
 	ld700-main.c
 	ld700-main.h
 	ld700-main-asm.s

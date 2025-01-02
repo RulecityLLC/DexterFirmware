@@ -24,6 +24,16 @@ ld700_cycles g_ld700_cycles[4] =
 	{CYCLES_TIL_TIMEOUT, 0, 0}	// second and third value are ignored
 };
 
+/*
+IMPORTANT:
+
+This function is not actually used.
+It is a template for the assembly language ISR that is currently part of the Dexter firmware.
+I wrote this function in order to add comprehensive unit tests around it before I went to the trouble to convert it to assembly language.
+I expect the assembly language version to never need to change.  If it does, using this function as a starting point (along with its tests) may be a wise starting point.
+
+*/
+
 void PCINT0_vect()
 {
 	// store hardware values as close to when interrupt started to maximize accuracy
