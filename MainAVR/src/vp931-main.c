@@ -13,6 +13,7 @@
 #include "led_driver.h"
 #include "vp931-main.h"
 #include "vp931-callbacks.h"
+#include "common-ldp.h"
 
 // uncomment this to ignore the actual field and just toggle a field internally to make debugging easier
 #ifdef DEBUG
@@ -95,7 +96,7 @@ void vp931_main_loop()
 	set_vsync_isr_callback(vp931_vsync_callback);
 
 	// for now, no spin-up delay
-	ldpc_set_vblanks_per_spinup(0);
+	common_enable_spinup_delay(0);
 
 	// the VP-931 automatically plays on power-up
 	ldpc_play(LDPC_FORWARD);
@@ -250,6 +251,9 @@ void vp931_main_loop()
 
 done:
 	// clean-up
+
+	// restore spin-up delay since we forcefully disabled it
+	common_enable_spinup_delay(IsSpinupDelayEnabledEeprom());
 
 	// other modes will expect it to be disabled, so disable it now as part of clean-up
 	DISABLE_OPTO_RELAY();
