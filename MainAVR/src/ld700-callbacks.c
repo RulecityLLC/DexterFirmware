@@ -10,6 +10,7 @@ void ld700_setup_callbacks()
 {
 	g_ld700i_play = ld700_play;
 	g_ld700i_pause = ld700_pause;
+	g_ld700i_step = ld700_step;
 	g_ld700i_stop = ld700_stop;
 	g_ld700i_eject = ld700_eject;
 	g_ld700i_begin_search = common_ldp_begin_search;
@@ -67,6 +68,12 @@ void ld700_pause()
 {
 	log_string(STRING_CMD_PAUSE);
 	ldpc_pause();
+}
+
+void ld700_step(LD700_BOOL bStepReverse)
+{
+	log_string(STRING_CMD_STEP);
+	ldpc_step(bStepReverse == LD700_FALSE ? LDPC_FORWARD : LDPC_BACKWARD);
 }
 
 void ld700_stop()

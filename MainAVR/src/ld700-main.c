@@ -77,7 +77,9 @@ void ld700_main_loop()
 	// PA0: EXT_CTRL'
 	// PA1: INT/EXT'
 	// PA2: Flip Disc Button (active low)
-	DDRA &= ~((1 << PA0) | (1 << PA1) | (1 << PA2));
+
+	DDRA &= ~((1 << PA0) | (1 << PA1) | (1 << PA2));	
+	PORTA |= ((1 << PA0) | (1 << PA1) | (1 << PA2));	// enable pull-ups on inputs
 	
 	// Output
 	// PA5: Side 2 LED
@@ -119,17 +121,18 @@ void ld700_main_loop()
 			// if we have a message ready to process
 			if (g_ld700_u8FinishedByteReady)
 			{
-				// send received byte to interpreter
-				ld700i_write(g_ld700_u8FinishedByte, ld700_convert_status(ldpc_get_status()));
-				
-				// set flag back to 0 so we can detect when the next byte has come in
-				g_ld700_u8FinishedByteReady = 0;
-				
 				// if diagnostics mode is enabled log the incoming byte
+				// (this is intentionally before the call to ld700i_write so that the debug log is easier to read)
 				if (IsDiagnosticsEnabledEeprom())
 				{
 					MediaServerSendRxLog(g_ld700_u8FinishedByte);
 				}
+				
+				// send received byte to interpreter
+				ld700i_write(g_ld700_u8FinishedByte, ld700_convert_status(ldpc_get_status()));
+				
+				// set flag back to 0 so we can detect when the next byte has come in
+				g_ld700_u8FinishedByteReady = 0;				
 			}
 			
 			// use idle time to process low-priority tasks

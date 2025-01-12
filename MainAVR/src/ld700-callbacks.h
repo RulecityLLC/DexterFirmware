@@ -7,6 +7,7 @@ void ld700_setup_callbacks();
 LD700Status_t ld700_convert_status(LDPCStatus_t status);
 void ld700_play();
 void ld700_pause();
+void ld700_step(LD700_BOOL bStepReverse);
 void ld700_stop();
 void ld700_close_tray();
 void ld700_eject();
