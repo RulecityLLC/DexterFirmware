@@ -57,10 +57,10 @@ VP931Status_t vp931_convert_status(LDPCStatus_t status)
 
 void vp931_main_loop()
 {
-	uint8_t u8VsyncCounter = 0;
 	uint8_t u8Field = 0;
 	uint32_t u32Vbi = 0;
 	LDPCStatus_t uLdpStatus = 0;
+	uint8_t u8SearchDelayEnabledSaved = IsSearchDelayEnabledMemory();	// we always turn this off for VP-931 mode to enusre firefox skipping is instant
 
 #ifdef VP931_DEBUG
 	uint8_t u8LastField = 0;
@@ -97,6 +97,8 @@ void vp931_main_loop()
 
 	// for now, no spin-up delay
 	common_enable_spinup_delay(0);
+	
+	SetSearchDelayEnabledMemory(0);	// firefox uses searches as skips, so they need to be instant
 
 	// the VP-931 automatically plays on power-up
 	ldpc_play(LDPC_FORWARD);
@@ -173,30 +175,11 @@ void vp931_main_loop()
 			LDPC_TRUE,	// vblank _is_ active
 			u8Field);
 
-		u8VsyncCounter++;
-		if (u8VsyncCounter & 0x8)
-		{
-			// blink the LED so we know the interrupt is working
-			LED_VSYNC_PIN_TOGGLE();
-			u8VsyncCounter = 0;
-		}
-
 		ldpc_OnVBlankChanged(
 			LDPC_FALSE,	// vblank is no longer active (or at least, this is a good place to end it)
 			u8Field);
 
-		uLdpStatus = ldpc_get_status();
-
-		// send field update if not seeking
-		if (uLdpStatus != LDPC_SEARCHING)
-		{
-			// send current field to frame server
-			unsigned long u = ldpc_get_current_abs_field();
-			if (u != VBIMiniNoFrame)
-			{
-				MediaServerSendField(u, ldpc_get_audio_status());
-			}
-		}
+		on_video_field();
 
 		// grab the VBI data
 		u32Vbi = ldpc_get_current_field_vbi_line18();
@@ -254,6 +237,7 @@ done:
 
 	// restore spin-up delay since we forcefully disabled it
 	common_enable_spinup_delay(IsSpinupDelayEnabledEeprom());
+	SetSearchDelayEnabledMemory(u8SearchDelayEnabledSaved);
 
 	// other modes will expect it to be disabled, so disable it now as part of clean-up
 	DISABLE_OPTO_RELAY();
@@ -262,4 +246,6 @@ done:
 	DISABLE_VSYNC_INT();
 	DISABLE_INT_WREN();
 	DISABLE_INT_RDEN();
+	
+	
 }
