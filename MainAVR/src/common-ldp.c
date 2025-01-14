@@ -17,6 +17,9 @@ uint8_t g_u8CurTextOverlayId = 0;
 // minimum number of fields to delay for a seek (some games may need this to be non-zero)
 uint8_t g_u8MinimumSearchDelayFields = 0;
 
+uint32_t g_u32NextStopcodeField = 0;	// the next absolute field that has a stop code
+uint8_t g_u8OffsetFieldAfterNext = 0;	// the offset to the stopcode field after that (0 if nothing is close)
+
 void on_video_field()
 {
 	LDPCStatus_t u8 = ldpc_get_status();
@@ -27,6 +30,18 @@ void on_video_field()
 	if (u8 != LDPC_SEARCHING)
 	{
 		uint32_t u = ldpc_get_current_abs_field();
+
+		// do we have two stop-codes close together?
+		if (g_u8OffsetFieldAfterNext != 0)
+		{
+			// if we just hit our first stop code field, then we need to tell ldpc about the next stop code field because the media server may not have time to update us before we hit it
+			if (u == g_u32NextStopcodeField)
+			{
+				// at this point, ldpc already knows that it's hit the first stop code field, so it's okay for us to update it with the next field
+				ldpc_set_next_field_with_stopcode(u + g_u8OffsetFieldAfterNext);
+				g_u8OffsetFieldAfterNext = 0;	// now that we've updated ldpc, we don't need to perform this check again until the media server updates us with the latest stop code info
+			}
+		}
 
 		// if current field is valid (ie disc is not stopped or spinning up) and video is not muted (time traveler mutes video sometimes)
 		if ((u != VBIMiniNoFrame) && (ldpc_get_video_muted() == LDPC_FALSE))
@@ -208,5 +223,17 @@ void common_log_ldpc_status(LDPCStatus_t u8)
 	case LDPC_STEPPING:
 		// do not log stepping status since it will change almost immediately to paused
 		break;
+	}
+}
+
+void common_on_new_stopcode_etc(uint32_t u32NextField, uint8_t u8OffsetFieldAfterNext)
+{
+	ldpc_set_next_field_with_stopcode(u32NextField);
+	
+	// if media server has provided us with another stop-code field that's coming up soon
+	if (u8OffsetFieldAfterNext != 0)
+	{
+		g_u32NextStopcodeField = u32NextField;
+		g_u8OffsetFieldAfterNext = u8OffsetFieldAfterNext;
 	}
 }

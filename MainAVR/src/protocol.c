@@ -26,7 +26,7 @@ static uint8_t g_disc_switch_id = 0;	// which disc id was requested for the disc
 uint8_t g_u8InCriticalSection = 0;
 #endif // critical section check
 
-#define PROTOCOL_VERSION 0x13
+#define PROTOCOL_VERSION 0x14
 
 ////////////////////////////////
 
@@ -234,8 +234,14 @@ void ProcessPacket()
 		// if current ldp mode honors stop codes
 		if (GetHonorStopCodesMemory())
 		{
-			uint32_t u32NextField = g_pPacketBuf[1] | (((uint32_t) g_pPacketBuf[2]) << 8) | (((uint32_t) g_pPacketBuf[3]) << 16) | (((uint32_t) g_pPacketBuf[4]) << 24);
-			ldpc_set_next_field_with_stopcode(u32NextField);
+			uint32_t u32NextField = g_pPacketBuf[1] | (((uint32_t) g_pPacketBuf[2]) << 8) | (((uint32_t) g_pPacketBuf[3]) << 16);
+			uint8_t u8OffsetFieldAfterNext = g_pPacketBuf[4];
+			
+			// 0xFFFFFF means no stop code is in the future.  So we don't want to waste time if there is no stop code.
+			if (u32NextField != 0xFFFFFF)
+			{
+				common_on_new_stopcode_etc(u32NextField, u8OffsetFieldAfterNext);
+			}
 		}
 		break;
 	case 'p':	// firmware update page

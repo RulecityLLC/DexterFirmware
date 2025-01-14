@@ -18,4 +18,7 @@ void common_enable_spinup_delay(uint8_t bEnabled);
 
 void common_log_ldpc_status(LDPCStatus_t u8);
 
+// should be called when new stopcode info comes in from media server
+void common_on_new_stopcode_etc(uint32_t u32NextField, uint8_t u8FieldAfterNextOffset);
+
 #endif // COMMON_LDP_H
