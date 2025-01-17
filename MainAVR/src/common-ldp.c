@@ -228,12 +228,21 @@ void common_log_ldpc_status(LDPCStatus_t u8)
 
 void common_on_new_stopcode_etc(uint32_t u32NextField, uint8_t u8OffsetFieldAfterNext)
 {
-	ldpc_set_next_field_with_stopcode(u32NextField);
-	
-	// if media server has provided us with another stop-code field that's coming up soon
-	if (u8OffsetFieldAfterNext != 0)
+	uint32_t u = ldpc_get_current_abs_field();
+
+	// A stop code update from the media server can come too late, so we should do some sanity checking before just blindly accepting it.
+	// We know that a stop code field is only going to be valid for us if it comes after the field that we're currently at.
+	// If it doesn't, we'll assume it's late/obsolete and ignore it because we can't make use of it.
+	// We could also check to see if there's an offset that may yet be valid but we shouldn't need to resort to this type of complexity without confidence that we'd get a return on investment. (ie stop codes being missed frequently)
+	if (u32NextField > u)
 	{
-		g_u32NextStopcodeField = u32NextField;
-		g_u8OffsetFieldAfterNext = u8OffsetFieldAfterNext;
+		ldpc_set_next_field_with_stopcode(u32NextField);
+
+		// if media server has provided us with another stop-code field that's coming up soon
+		if (u8OffsetFieldAfterNext != 0)
+		{
+			g_u32NextStopcodeField = u32NextField;
+			g_u8OffsetFieldAfterNext = u8OffsetFieldAfterNext;
+		}
 	}
 }
