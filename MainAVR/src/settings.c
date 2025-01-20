@@ -99,8 +99,7 @@ settings_bad:
 	// fill in default values since the CRC failed
 
 	p8Buf[0] = p8Buf[1] = 0;	// persistent identifier
-	//p8Buf[2] = LDP_LDV1000;	// default player
-	p8Buf[2] = LDP_OTHER;	// DO NOT CHECK THIS IN!
+	p8Buf[2] = LDP_LDV1000;	// default player
 	p8Buf[3] = 0 | (1 << 6);	// behavior is authentic with auto-detection enabled
 #ifdef DEBUG
 	p8Buf[3] |= (1 << 3);	// enable diagnose mode
