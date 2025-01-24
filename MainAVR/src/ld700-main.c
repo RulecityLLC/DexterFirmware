@@ -3,19 +3,19 @@
 #include <string.h>
 #include "vldp-avr.h"
 #include <ldp-abst/ldpc.h>
-#include <ldp-in/ld700-interpreter.h>
-#include "ld700-common.h"
-#include "ld700-callbacks.h"
+//#include <ldp-in/ld700-interpreter.h>
+#include "ld700-common.h"	// to set up the ld700_cycles struct
+#include "ld700-callbacks.h"	// to call the setup callback method
 #include "protocol.h"
-#include "settings.h"
-#include "strings.h"
+#include "settings.h"	// to get active disc id
+#include "dexter_strings.h"
 #include "idle.h"
 #include "vsync.h"
-//#include "util.h"
-//#include "led_driver.h"
-//#include "timer-global.h"
+#include "timer-global.h"	// for button debouncing
 #include "timer1.h"	// for setting the timer1 callback
 #include "ld700-main.h"
+#include "ld700-main-deps.h"	// for idle think
+#include "ld700-main-up-one-from-leaf.h"	// for buttons think
 #include "common-ldp.h"	// for video callback definition
 
 /////////////////////////////////////////////////////////////////
@@ -36,7 +36,7 @@ ld700_cycles g_ld700_cycles[4] =
 	{CYCLES_TIL_TIMEOUT, 0, 0}	// for when we are receiving the actual bits.  the second and third value are ignored
 };
 
-// used only by ISR
+// used only by ISR (must not be declared as 'static' or linker will fail)
 uint8_t g_ld700_u8ReceivingStage = STAGE_WAITING_FOR_8MS;
 uint8_t g_ld700_u8Message = 0;
 uint8_t g_ld700_u8ReceivedBitCount = 0;
@@ -102,6 +102,8 @@ void ld700_main_loop()
 	}
 
 	ld700i_reset();
+	ld700_deps_reset();
+	ld700_up_one_from_leaf_reset();
 
 	// to handle EXT_CTRL' timeouts
 	set_timer1_isr_callback(ld700_on_ext_ctrl_timeout);
@@ -136,21 +138,10 @@ void ld700_main_loop()
 			}
 			
 			// use idle time to process low-priority tasks
+			ld700_button_think();
+			ld700_idle_think();
 			idle_think();
 			
-			// if 'flip disc' button is being pressed
-			if ((PINA & (1 << PA2)) == 0)
-			{
-				LDPCStatus_t status = ldpc_get_status();
-				
-				// (for now) we only want to take action if the disc is stopped. This saves us from having to implement a debouncer, and also gives
-				//   a quick way to override Halcyon's persistent efforts to eject the disc.
-				if (status == LDPC_STOPPED)
-				{
-					ld700_close_tray();
-				}
-			}
-
  			// if user presses MODE button then abort (this is needed in case we have no video signal plugged in)
 			if (g_bRestartPlayer)
 			{
@@ -187,9 +178,13 @@ void ld700_main_loop()
 		// do interpreter stuff that happens after vblank.
 		// I put this after on_video_field so that performance of the video fields to the media server stays fairly constant.
 		ld700i_on_vblank(ld700_convert_status(ldpc_get_status()));
+		
+		ld700_on_vblank();
 	}
 
 done:
+
+	// TODO : check to see if we're in the middle of a disc switch and clean-up from that properly
 
 	// clean-up	
 	DISABLE_LD700_INT();

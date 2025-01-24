@@ -7,7 +7,7 @@
 #include "vsync.h"	// to disable interrupt
 #include "serial.h"	// for debug
 #include "serial2.h"	// to disable interrupt
-#include "strings.h"
+#include "dexter_strings.h"
 #include "vldp-avr.h"	// for restart player global
 #include "led_driver.h"
 #include "common-ldp.h"

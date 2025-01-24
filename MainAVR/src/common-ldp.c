@@ -1,4 +1,4 @@
-#include "strings.h"
+#include "dexter_strings.h"
 #include "protocol.h"
 #include "settings.h"
 #include "led_driver.h"
@@ -6,7 +6,7 @@
 #include <ldp-abst/ldp_search_delay.h>
 
 uint8_t g_u8LDPCLastStatus = 0;
-uint8_t g_u8VsyncCounter = 0;
+static uint8_t g_u8VsyncCounter = 0;
 
 // whether text overlay is currently enabled.
 uint8_t g_bTextOverlayEnabled = 0;
@@ -245,4 +245,9 @@ void common_on_new_stopcode_etc(uint32_t u32NextField, uint8_t u8OffsetFieldAfte
 			g_u8OffsetFieldAfterNext = u8OffsetFieldAfterNext;
 		}
 	}
+}
+
+uint8_t common_get_3bit_vsync_counter()
+{
+	return g_u8VsyncCounter;
 }

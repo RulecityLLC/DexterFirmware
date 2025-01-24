@@ -1,16 +1,8 @@
-#ifndef IO_H
-#define IO_H
+#ifndef PROTOCOL_H
+#define PROTOCOL_H
 
 #include <ldp-abst/ldpc.h>
 #include "serial.h"
-
-typedef enum
-{
-	PROTOCOL_DISC_SWITCH_IDLE,
-	PROTOCOL_DISC_SWITCH_ACTIVE,
-	PROTOCOL_DISC_SWITCH_SUCCESS,
-	PROTOCOL_DISC_SWITCH_ERROR
-} ProtocolDiscSwitchStatus_t;
 
 void io_think();
 void ProcessPacket();
@@ -32,11 +24,6 @@ void MediaServerSendAuxLogMessage(uint8_t *pLogMsgPacket, uint8_t u8Length);
 void MediaServerSendAuxBuildNumber(uint8_t *pBuildNumPacket, uint8_t u8Length);
 void MediaServerSendAuxPageRequest(uint8_t *pPageReqPacket, uint8_t u8Length);
 
-void protocol_initiate_disc_switch(uint8_t idDisc);
-
-// this method does more than one thing because of performance concerns
-ProtocolDiscSwitchStatus_t protocol_get_disc_switch_status_and_think();
-
 #define LOG(s)  MediaServerSendLog(s)
 #define LOG_ERR(s)	MediaServerSendError(s)
 
@@ -56,4 +43,4 @@ extern uint8_t g_u8InCriticalSection;
 #define LEAVE_CRITICAL_SECTION() TX_INT_ENABLE()
 #endif
 
-#endif // IO_H
+#endif // PROTOCOL_H

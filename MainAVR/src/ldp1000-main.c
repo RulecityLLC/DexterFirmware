@@ -7,7 +7,7 @@
 #include "ldp1000_callbacks.h"
 #include "protocol.h"
 #include "settings.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "serial2.h"
 #include "idle.h"
 #include "vsync.h"
@@ -17,6 +17,7 @@
 #include "ldp1000-common.h"
 #include "ldp1000-main.h"
 #include "common-ldp.h"	// for video callback definition
+#include "disc_switch.h"	// for disc switching
 
 uint8_t g_u8LDP1000VsyncActive = 0;	// whether vsync is active or not
 uint8_t g_u8LDP1000CurField = 0;
@@ -294,7 +295,7 @@ done:
 
 void alg_multirom_check()
 {
-	uint8_t u8, u8DiscId, u8Timer;
+	uint8_t u8, u8DiscId;
 
 	// enable input mode for PB6 (centronics pin 17)
 	DDRB &= ~(1 << PB6);
@@ -359,36 +360,30 @@ void alg_multirom_check()
 	// we don't need to log what we are about to do because media server will log it for us
 
 	// initiate disc switch
-	protocol_initiate_disc_switch(u8DiscId);
-
-	u8Timer = GET_GLOBAL_TIMER_VALUE();
+	disc_switch_initiate(u8DiscId);
 
 	// we don't want to loop if user manually intervenes
 	while (!g_bRestartPlayer)
 	{
-		ProtocolDiscSwitchStatus_t status;
+		DiscSwitchStatus_t status;
 
 		// wait until disc switch is complete
 		idle_think();
 
-		// if it's been more than 0.5 second (don't spam the media server)
-		if (GLOBAL_TIMER_DIFF_SINCE_START(u8Timer) > 35)
+		// check to see if disc switch is finished
+		status = disc_switch_get_status();
+
+		// if disc switching is done
+		if (status != DISC_SWITCH_ACTIVE)
 		{
-			// check to see if disc switch is finished
-			status = protocol_get_disc_switch_status_and_think();
+            disc_switch_end();	// we need to call this once we've observed that disc switching is ended
 
-			// if disc switching is done
-			if (status != PROTOCOL_DISC_SWITCH_ACTIVE)
+			// media server's log message is a little obscure, add our own log to remove all doubt
+			if (status == DISC_SWITCH_ERROR)
 			{
-				// media server's log message is a little obscure, add our own log to remove all doubt
-				if (status == PROTOCOL_DISC_SWITCH_ERROR)
-				{
-					log_string(STRING_DISCSWITCH_FAILED);
-				}
-				break;
+				log_string(STRING_DISCSWITCH_FAILED);
 			}
-
-			u8Timer = GET_GLOBAL_TIMER_VALUE();
+			break;
 		}
 	}
 }

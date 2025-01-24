@@ -21,4 +21,7 @@ void common_log_ldpc_status(LDPCStatus_t u8);
 // should be called when new stopcode info comes in from media server
 void common_on_new_stopcode_etc(uint32_t u32NextField, uint8_t u8FieldAfterNextOffset);
 
+// range is 0-7, for blinking LEDs
+uint8_t common_get_3bit_vsync_counter();
+
 #endif // COMMON_LDP_H

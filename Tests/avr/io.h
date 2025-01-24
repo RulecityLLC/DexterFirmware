@@ -5,50 +5,84 @@
 
 ///////////////////////////////////////
 
+#define CS11	1
+
+#define INTF2	2
+
 #define OCF1A 1
 #define OCIE1A 1
 
+#define PA0	0
+#define PA1	1
+#define PA2	2
+#define PA3	3
+#define PA4	4
+#define PA5	5
+#define PA6	6
+#define PA7	7
+
+#define PCIE0	0
+
+#define PCINT0	0
+
+#define WGM12	3
+
 ///////////////////////////////////////
 
-class TCNT1TestInterface
+template <typename T> class ReadOnlyRegister
 {
 public:
-	virtual ~TCNT1TestInterface() = default;
+	virtual ~ReadOnlyRegister() = default;
 
-	virtual TCNT1TestInterface& operator = (uint16_t index) = 0;
-	virtual operator uint16_t() const = 0;
+	virtual operator T() const = 0;
 };
 
-extern TCNT1TestInterface *g_pTCNT1Ptr;
+///////////////////////////////////////
+
+template <typename T> class ReadWriteRegister : public ReadOnlyRegister<T>
+{
+public:
+	virtual ReadWriteRegister& operator = (T val) = 0;
+	virtual ReadWriteRegister& operator &= (T val) = 0;
+	virtual ReadWriteRegister& operator |= (T val) = 0;
+};
+
+///////////////////////////////////////
+
+extern ReadWriteRegister<uint8_t> *g_pDDRAPtr;
+#define DDRA *g_pDDRAPtr
+
+extern ReadWriteRegister<uint8_t> *g_pEIFRPtr;
+#define EIFR *g_pEIFRPtr
+
+extern ReadWriteRegister<uint8_t> *g_pPCICRPtr;
+#define PCICR *g_pPCICRPtr
+
+extern ReadWriteRegister<uint8_t> *g_pPCMSK0Ptr;
+#define PCMSK0 *g_pPCMSK0Ptr
+
+extern ReadOnlyRegister<uint8_t> *g_pPINAPtr;
+#define PINA *g_pPINAPtr
+
+extern ReadOnlyRegister<uint8_t> *g_pPINBPtr;
+#define PINB *g_pPINBPtr
+
+extern ReadWriteRegister<uint8_t> *g_pPORTAPtr;
+#define PORTA *g_pPORTAPtr
+
+extern ReadWriteRegister<uint8_t> *g_pTCCR1BPtr;
+#define TCCR1B *g_pTCCR1BPtr
+
+extern ReadWriteRegister<uint8_t> *g_pTCNT0Ptr;
+#define TCNT0 *g_pTCNT0Ptr
+
+extern ReadWriteRegister<uint16_t> *g_pTCNT1Ptr;
 #define TCNT1 *g_pTCNT1Ptr
 
-////////////////////////////////////////
-
-class TIFR1TestInterface
-{
-public:
-	virtual ~TIFR1TestInterface() = default;
-
-	virtual TIFR1TestInterface& operator |= (uint8_t index) = 0;
-};
-
-extern TIFR1TestInterface *g_pTIFR1Ptr;
+extern ReadWriteRegister<uint8_t> *g_pTIFR1Ptr;
 #define TIFR1 *g_pTIFR1Ptr
 
-///////////////////////////////////////
-////////////////////////////////////////
-
-class TIMSK1TestInterface
-{
-public:
-	virtual ~TIMSK1TestInterface() = default;
-
-	virtual TIMSK1TestInterface& operator |= (uint8_t) = 0;
-	virtual TIMSK1TestInterface& operator &= (uint8_t) = 0;
-};
-
-extern TIMSK1TestInterface *g_pTIMSK1Ptr;
+extern ReadWriteRegister<uint8_t> *g_pTIMSK1Ptr;
 #define TIMSK1 *g_pTIMSK1Ptr
-
 
 #endif //IO_H

@@ -4,7 +4,7 @@
 #include "idle.h"
 #include "settings.h"
 #include "protocol.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "led_driver.h"
 #include "ldv1000-main.h"
 #include "pr7820-main.h"

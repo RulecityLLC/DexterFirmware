@@ -21,3 +21,5 @@ void ldv1000_skip_backward(uint8_t uTracks);
 void ldv1000_change_audio(uint8_t uChannel, uint8_t Enable);
 
 void ldv1000_on_error(const char *pszErrMsg);
+
+void ldv1000_begin_changing_to_disc(uint8_t idDisc);

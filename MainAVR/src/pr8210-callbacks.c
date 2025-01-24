@@ -1,7 +1,7 @@
 #include "common-ldp.h"
 #include "protocol.h"
 #include "pr8210-callbacks.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "util.h"
 #include "protocol.h"
 #include "settings.h"

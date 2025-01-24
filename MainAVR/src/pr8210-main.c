@@ -6,7 +6,7 @@
 #include <ldp-abst/ldp_search_delay.h>
 #include "protocol.h"
 #include "settings.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "idle.h"
 #include "vsync.h"
 #include "util.h"

@@ -13,6 +13,8 @@ set(AVR_MAIN_SRCS
 	common-ldp.h
 	deferred_eeprom_write.c
 	deferred_eeprom_write.h
+	disc_switch.c
+	disc_switch.h
 	idle.c
 	idle.h
 	ldp_stub.c
@@ -22,6 +24,10 @@ set(AVR_MAIN_SRCS
 	ld700-main.c
 	ld700-main.h
 	ld700-main-asm.s
+	ld700-main-deps.c
+	ld700-main-deps.h
+	ld700-main-up-one-from-leaf.c
+	ld700-main-up-one-from-leaf.h
 	ldp1000_callbacks.c
 	ldp1000_callbacks.h
 	ldp1000-main.c
@@ -54,8 +60,8 @@ set(AVR_MAIN_SRCS
 	serial2.h
 	settings.c
 	settings.h
-	strings.c
-	strings.h
+	dexter_strings.c
+	dexter_strings.h
 	timer1.c
 	timer1.h
 	timer1_asm.s

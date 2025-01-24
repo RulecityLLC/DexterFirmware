@@ -1,4 +1,4 @@
-#include "strings.h"
+#include "dexter_strings.h"
 #include <ldp-abst/ldpc.h>
 #include "common-ldp.h"
 #include "protocol.h"

@@ -1,6 +1,6 @@
 #include "vp931-callbacks.h"
 #include "vp931-main.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include <ldp-abst/ldpc.h>
 #include <ldp-in/vp931-interpreter.h>
 #include "protocol.h"
