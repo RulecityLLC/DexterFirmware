@@ -1,5 +1,5 @@
 #include "ldp_stub.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "vldp-avr.h"
 #include "idle.h"
 

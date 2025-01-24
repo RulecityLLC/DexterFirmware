@@ -1,6 +1,6 @@
 #include "protocol.h"
 #include "pr7820-callbacks.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include <ldp-abst/ldpc.h>
 #include <stdio.h>
 #include "common.h"	// for setting state to busy

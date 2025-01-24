@@ -1,7 +1,7 @@
 #include "timer-global.h"
 
 // this is a 16-bit number because the slow timer runs at about 70 ticks/second (18432000/1024/256)
-uint16_t g_u16TimerGlobalOverflowCount = 0;
+static uint16_t g_u16TimerGlobalOverflowCount = 0;
 
 void timer_global_init()
 {
@@ -24,4 +24,13 @@ void timer_global_think()
 		// flag is cleared by writing a 1
 		TIFR0 |= (1 << TOV0);
 	}
+}
+
+// having a function return the global value is better for testability and encapsulation.  We can try to inline for performance.
+#ifndef DEBUG
+inline
+#endif
+uint16_t timer_global_get_slow_val()
+{
+	return g_u16TimerGlobalOverflowCount;
 }

@@ -1,6 +1,6 @@
 #include "protocol.h"
 #include "vip9500sg-callbacks.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "util.h"
 #include "protocol.h"
 #include "common-ldp.h"

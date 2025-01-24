@@ -1,6 +1,7 @@
 #include "protocol.h"
+#include "disc_switch.h"
 #include "ldv1000_callbacks.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "settings.h"
 #include "common-ldp.h"
 #include <ldp-abst/ldpc.h>
@@ -21,7 +22,7 @@ void ldv1000_setup_callbacks()
 	g_ldv1000i_on_error = ldv1000_on_error;
 	g_ldv1000i_query_available_discs = GetAvailableDiscIdsEeprom;
 	g_ldv1000i_query_active_disc = GetActiveDiscIdMemory;
-	g_ldv1000i_begin_changing_to_disc = protocol_initiate_disc_switch;
+	g_ldv1000i_begin_changing_to_disc = ldv1000_begin_changing_to_disc;
 	g_ldv1000i_change_seek_delay = SetSearchDelayEnabledMemory;
 	g_ldv1000i_change_spinup_delay = common_enable_spinup_delay;
 	g_ldv1000i_change_super_mode = OnSuperModeChanged;
@@ -31,10 +32,10 @@ LDV1000Status_t ldv1000_get_status()
 {
 	LDV1000Status_t res = LDV1000_ERROR;
 
-	ProtocolDiscSwitchStatus_t status = protocol_get_disc_switch_status_and_think();
+	DiscSwitchStatus_t status = disc_switch_get_status();
 
 	// if no disc switch is underway, just return the regular LD-V1000 status
-	if (status == PROTOCOL_DISC_SWITCH_IDLE)
+	if (status == DISC_SWITCH_IDLE)
 	{
 		switch (ldpc_get_status())
 		{
@@ -63,15 +64,17 @@ LDV1000Status_t ldv1000_get_status()
 	{
 		switch (status)
 		{
-		case PROTOCOL_DISC_SWITCH_ACTIVE:
+		case DISC_SWITCH_ACTIVE:
 			res = LDV1000_DISC_SWITCHING;
 			break;
-		case PROTOCOL_DISC_SWITCH_SUCCESS:
+		case DISC_SWITCH_SUCCESS:
 			res = LDV1000_STOPPED;
+			disc_switch_end();	// we need to explicitly call this after we've seen the end status
 			break;
 		default:	// make default the error case so we can catch defects in our code
-		case PROTOCOL_DISC_SWITCH_ERROR:
+		case DISC_SWITCH_ERROR:
 			res = LDV1000_ERROR;
+			disc_switch_end();	// we need to explicitly call this after we've seen the end status
 			break;
 		}
 	}
@@ -125,4 +128,14 @@ void ldv1000_change_audio(uint8_t uChannel, uint8_t Enable)
 void ldv1000_on_error(const char *pszErrMsg)
 {
 	LOG_ERR(pszErrMsg);
+}
+
+void ldv1000_begin_changing_to_disc(uint8_t idDisc)
+{
+	// Once disc switching is used, we always disable disc spin-up delay.
+	// This is because disc switching is supposed to mimic a frame seek.
+	// Also, we should not force caller to know that we need to explicitly disable disc spin-up when doing disc switching. (hide implementation)
+	common_enable_spinup_delay(0);
+
+	disc_switch_initiate(idDisc);
 }

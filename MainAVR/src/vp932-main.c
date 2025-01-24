@@ -7,7 +7,7 @@
 #include "vp932-callbacks.h"
 #include "protocol.h"
 #include "settings.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "serial2.h"
 #include "idle.h"
 #include "vsync.h"

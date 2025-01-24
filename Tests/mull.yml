@@ -1,5 +1,14 @@
 mutators:
- - cxx_all
+ - cxx_init_const
+ - cxx_bitwise_assignment
+ - cxx_arithmetic_assignment
+ - cxx_pre_inc_to_pre_dec # removed cxx_post_inc_to_post_dec because I am using that as a shortcut to make a bool-like byte non-zero
+ - cxx_decrement
+ - cxx_arithmetic
+ - cxx_comparison
+ - cxx_boundary
+ - cxx_bitwise
+ - cxx_remove_void_call # removed cxx_replace_scalar_call because it was replacing the call with 42 which was equivalent to non-zero so it didn't help me
 excludePaths: # support regex
  - gtest
  - gmock

@@ -1,6 +1,6 @@
 #include "protocol.h"
 #include "ldp1000_callbacks.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "util.h"
 #include "protocol.h"
 #include <ldp-abst/ldpc.h>

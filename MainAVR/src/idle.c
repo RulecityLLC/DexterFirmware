@@ -5,6 +5,7 @@
 #include "led_blinker.h"
 #include "deferred_eeprom_write.h"
 #include "timer-global.h"
+#include "disc_switch.h"
 
 void idle_think()
 {
@@ -14,6 +15,7 @@ void idle_think()
 	led_blinker_think();
 	deferred_eeprom_write_think();
 	timer_global_think();
+	disc_switch_think();
 }
 
 void idle_think_critical_section()

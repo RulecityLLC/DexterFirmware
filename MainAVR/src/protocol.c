@@ -5,10 +5,11 @@
 #include "crc.h"
 #include "protocol.h"
 #include "ldp1000_callbacks.h"	// for ldp1000_send_text_overlay_packet
-#include "strings.h"
+#include "dexter_strings.h"
 #include "vbi_inject.h"
 #include "vldp-avr.h"
 #include "common-ldp.h"
+#include "disc_switch.h"
 
 static unsigned char g_bGotSyncByte = 0;
 static uint16_t g_u16RawIdx = 0;
@@ -18,8 +19,6 @@ static uint16_t g_u16PacketIdx = 0;
 static uint8_t g_pPacketBuf[255];	// TODO : increase this depending on how big our packet can be
 static uint8_t g_u8CRCIdx = 0;
 static uint8_t g_crc[2];
-static ProtocolDiscSwitchStatus_t g_disc_switch_status = PROTOCOL_DISC_SWITCH_IDLE;
-static uint8_t g_disc_switch_id = 0;	// which disc id was requested for the disc switch
 
 #ifdef PROTOCOL_CHECK_CRITICAL_SECTION
 // used to assert that code isn't doing stuff during critical section that it must not do
@@ -160,34 +159,7 @@ void ProcessPacket()
 		SetActiveDiscIdMemory(g_pPacketBuf[1]);
 		break;
 	case 'D':	// disc switch acknowledge
-
-		// if we are in the middle of a disc switch
-		if (g_disc_switch_status == PROTOCOL_DISC_SWITCH_ACTIVE)
-		{
-			uint8_t u8MediaServerDiscId = g_pPacketBuf[1];
-
-			if (u8MediaServerDiscId == g_disc_switch_id)
-			{
-				// if disc switch succeeded
-				if (g_pPacketBuf[2] == 1)
-				{
-					g_disc_switch_status = PROTOCOL_DISC_SWITCH_SUCCESS;
-				}
-				// else disc switch failed
-				else
-				{
-					g_disc_switch_status = PROTOCOL_DISC_SWITCH_ERROR;
-				}
-			}
-			// else the disc id does not match what we are expecting, so stay in the active state (which will cause us to resend the request)
-			else
-			{
-				// this should never happen, so log it if it does
-				log_string(STRING_ERROR);
-			}
-		}
-		// else we can safely ignore this
-
+		on_disc_switch_acknowledge(g_pPacketBuf[1], g_pPacketBuf[2]);
 		break;
 	case 'H':	// hello (new settings)
 		// check to make sure the version of these settings matches ours
@@ -198,19 +170,11 @@ void ProcessPacket()
 			// (+2 to skip the leading 'H' character and eeprom save preference)
 			apply_new_settings(g_pPacketBuf[1], g_pPacketBuf + 2, g_u16PacketLength - 2);
 
-			// If disc switching has been used at least once, then always disable disc spin-up delay
-			// This is because disc switching is supposed to mimic a frame seek.
-			// Also, we should not force caller to know that we need to explicitly disable disc spin-up when doing disc switching. (hide implementation)
-			if (g_disc_switch_id != 0)
-			{
-				common_enable_spinup_delay(0);
-			}
-
 			// To be safe, we generally want to reset the active player when we get new settings in
 			//  (because the new settings can and do change the active disc)
 			// However, we only want to reset the active player if we are not in the middle of a disc switch
 			// (If we reset laserdisc interpreter in the middle of a disc switch, then our state will be out of sync)
-			if (g_disc_switch_status == PROTOCOL_DISC_SWITCH_IDLE)
+			if (disc_switch_get_status() == DISC_SWITCH_IDLE)
 			{
 				g_bRestartPlayer++;
 			}
@@ -493,40 +457,6 @@ void MediaServerSendAuxPageRequest(uint8_t *pPageReqPacket, uint8_t u8Length)
 	pPageReqPacket[0] = 'z';	// change to z to indicate that it comes from the AUX AVR
 	
 	MediaServerSendSmallBuf(pPageReqPacket, u8Length);
-}
-
-void protocol_initiate_disc_switch(uint8_t idDisc)
-{
-	// want screen to go blank as soon as disc switch starts
-	MediaServerSendBlankScreen();
-
-	// stop the disc from playing so that we don't see 'garbage' fields during the transition
-	ldpc_stop();	
-	g_disc_switch_status = PROTOCOL_DISC_SWITCH_ACTIVE;
-	g_disc_switch_id = idDisc;
-}
-
-ProtocolDiscSwitchStatus_t protocol_get_disc_switch_status_and_think()
-{
-	ProtocolDiscSwitchStatus_t res = g_disc_switch_status;
-
-	switch (g_disc_switch_status)
-	{
-	default:
-	case PROTOCOL_DISC_SWITCH_IDLE:
-		break;
-	case PROTOCOL_DISC_SWITCH_ACTIVE:
-		// if we are active, send (another) disc switch request.  these requests are idempotent, so no problem sending duplicates.
-		MediaServerSendBlankScreen();	// in unlikely event that previous blank screen request was lost, keep resending it
-		MediaServerSendDiscSwitch(g_disc_switch_id);
-		break;
-	case PROTOCOL_DISC_SWITCH_SUCCESS:
-	case PROTOCOL_DISC_SWITCH_ERROR:
-		g_disc_switch_status = PROTOCOL_DISC_SWITCH_IDLE;
-		break;
-	}
-
-	return res;
 }
 
 #ifdef PROTOCOL_CHECK_CRITICAL_SECTION

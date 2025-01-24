@@ -2,7 +2,7 @@
 #include <string.h>
 #include "crc.h"
 #include "vbi_inject.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "protocol.h"
 #include "vldp-avr.h"
 #include "timer-global.h"

@@ -4,11 +4,7 @@
 using testing::Return;
 using testing::Mock;
 
-TCNT1TestInterface *g_pTCNT1Ptr;
-TIFR1TestInterface *g_pTIFR1Ptr;
-TIMSK1TestInterface *g_pTIMSK1Ptr;
-
-class LD700FirmwareTests : public ::testing::Test
+class LD700ISR : public ::testing::Test
 {
 public:
 	void SetUp() override
@@ -26,14 +22,14 @@ public:
 	}
 
 protected:
-	MockTCNT1 m_TCNT1;
-	MockTIFR1 m_TIFR1;
-	MockTIMSK1 m_TIMSK1;
+	MockReadWriteRegister16 m_TCNT1;
+	MockReadWriteRegister8 m_TIFR1;
+	MockReadWriteRegister8 m_TIMSK1;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void sendCmd(MockTCNT1 &mockTCNT1, uint8_t cmd)
+void sendCmd(MockReadWriteRegister16 &mockTCNT1, uint8_t cmd)
 {
 	uint32_t u32CmdSet = ((cmd ^ 0xFF) << 24) | (cmd << 16) | ((0xA8 ^ 0xFF) << 8) | 0xA8;
 
@@ -109,20 +105,20 @@ void sendCmd(MockTCNT1 &mockTCNT1, uint8_t cmd)
 	ASSERT_TRUE(Mock::VerifyAndClearExpectations(&mockTCNT1));
 }
 
-void doTimeoutSetup(MockTCNT1 &mockTCNT1, MockTIFR1 &mockTIFR1, MockTIMSK1 &mockTIMSK1, uint16_t u16TCNT1Val)
+void doTimeoutSetup(MockReadWriteRegister16 &mockTCNT1, MockReadWriteRegister8 &mockTIFR1, MockReadWriteRegister8 &mockTIMSK1, uint16_t u16TCNT1Val)
 {
 	{
 		testing::InSequence s;
 
 		EXPECT_CALL(mockTCNT1, GetOp()).WillOnce(Return(u16TCNT1Val));
-		EXPECT_CALL(mockTIMSK1, AndOp(~(1 << OCIE1A))).Times(1);
+		EXPECT_CALL(mockTIMSK1, AndEqualsOp(~(1 << OCIE1A))).Times(1);
 		EXPECT_CALL(mockTCNT1, AssignOp(0)).Times(1);
-		EXPECT_CALL(mockTIFR1, OrOp(1 << OCF1A)).Times(1);
-		EXPECT_CALL(mockTIMSK1, OrOp((1 << OCIE1A))).Times(1);
+		EXPECT_CALL(mockTIFR1, OrEqualsOp(1 << OCF1A)).Times(1);
+		EXPECT_CALL(mockTIMSK1, OrEqualsOp((1 << OCIE1A))).Times(1);
 	}
 }
 
-TEST_F(LD700FirmwareTests, ld700_isr1)
+TEST_F(LD700ISR, ld700_isr1)
 {
 	// 8MS LEADER DOWN
 
@@ -168,7 +164,7 @@ TEST_F(LD700FirmwareTests, ld700_isr1)
 	sendCmd(m_TCNT1, 0x17);	// arbitrary command
 }
 
-TEST_F(LD700FirmwareTests, ld700_leader_down_too_short)
+TEST_F(LD700ISR, ld700_leader_down_too_short)
 {
 	// 8MS LEADER DOWN
 

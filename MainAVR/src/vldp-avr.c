@@ -10,7 +10,7 @@
 #include "ldv1000_callbacks.h"
 #include "protocol.h"
 #include "settings.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "led_driver.h"
 #include "buttons.h"
 #include "ldv1000-main.h"

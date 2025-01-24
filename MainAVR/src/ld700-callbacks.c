@@ -1,5 +1,5 @@
 #include <avr/io.h>
-#include "strings.h"
+#include "dexter_strings.h"
 #include <ldp-abst/ldpc.h>
 #include "common-ldp.h"
 #include "protocol.h"
@@ -20,7 +20,7 @@ void ld700_setup_callbacks()
 }
 
 // ldpc doesn't currently keep track of whether disc is ejected, so we need to here
-uint8_t g_bLD700DiscEjected = 0;
+static uint8_t g_bLD700DiscEjected = 0;
 
 LD700Status_t ld700_convert_status(LDPCStatus_t status)
 {

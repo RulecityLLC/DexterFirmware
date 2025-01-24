@@ -1,5 +1,5 @@
 #include "protocol.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include <avr/pgmspace.h>
 
 // IMPORTANT: keep these strings shorter than the buffer in log_string!!

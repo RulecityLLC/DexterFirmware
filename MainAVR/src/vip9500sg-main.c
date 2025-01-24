@@ -5,7 +5,7 @@
 #include <ldp-abst/ldpc.h>
 #include <ldp-in/vip9500sg-interpreter.h>
 #include "vip9500sg-callbacks.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "serial2.h"
 #include "protocol.h"	// for LOG
 #include "settings.h"	// to check diagnostics

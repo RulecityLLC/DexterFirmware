@@ -7,7 +7,7 @@
 #include "ldv1000_callbacks.h"
 #include "protocol.h"
 #include "settings.h"
-#include "strings.h"
+#include "dexter_strings.h"
 #include "idle.h"
 #include "vsync.h"
 #include "timer1.h"
