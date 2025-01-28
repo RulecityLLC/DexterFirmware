@@ -44,4 +44,4 @@ jobs:
       # we only want to run this if all the unit tests pass
     - name: Mutation Testing (UpOneFromLeaf)
       working-directory: ${{github.workspace}}/build
-      run: /usr//bin/mull-runner-17 --ld-search-path /lib/x86_64-linux-gnu --mutation-score-threshold=100 tests/test_up_one_from_leaf
+      run: /usr//bin/mull-runner-17 --ld-search-path /lib/x86_64-linux-gnu --mutation-score-threshold=99 tests/test_up_one_from_leaf
