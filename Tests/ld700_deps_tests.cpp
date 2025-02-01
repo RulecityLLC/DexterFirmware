@@ -61,100 +61,88 @@ protected:
 TEST_F(LD700Deps, GetTargetDiscIdByCurDiscIdAndTargetSide)
 {
 	// thayer's quest
-	ASSERT_EQ(0x61,GetTargetDiscIdByCurDiscIdAndTargetSide(0x61, 0));
-	ASSERT_EQ(0x61,GetTargetDiscIdByCurDiscIdAndTargetSide(0x61, 1));
-	ASSERT_EQ(0x61,GetTargetDiscIdByCurDiscIdAndTargetSide(0x62, 0));
-	ASSERT_EQ(0x61,GetTargetDiscIdByCurDiscIdAndTargetSide(0x62, 1));
+	ASSERT_EQ(61,GetTargetDiscIdByCurDiscIdAndTargetSide(61, 0));
+	ASSERT_EQ(61,GetTargetDiscIdByCurDiscIdAndTargetSide(61, 1));
+	ASSERT_EQ(61,GetTargetDiscIdByCurDiscIdAndTargetSide(62, 0));
+	ASSERT_EQ(61,GetTargetDiscIdByCurDiscIdAndTargetSide(62, 1));
 
-	ASSERT_EQ(0x62,GetTargetDiscIdByCurDiscIdAndTargetSide(0x61, 2));
-	ASSERT_EQ(0x62,GetTargetDiscIdByCurDiscIdAndTargetSide(0x62, 2));
+	ASSERT_EQ(62,GetTargetDiscIdByCurDiscIdAndTargetSide(61, 2));
+	ASSERT_EQ(62,GetTargetDiscIdByCurDiscIdAndTargetSide(62, 2));
 
 	// nfl football
-	ASSERT_EQ(0x43,GetTargetDiscIdByCurDiscIdAndTargetSide(0x43, 0));
-	ASSERT_EQ(0x43,GetTargetDiscIdByCurDiscIdAndTargetSide(0x43, 1));
-	ASSERT_EQ(0x43,GetTargetDiscIdByCurDiscIdAndTargetSide(0x44, 0));
-	ASSERT_EQ(0x43,GetTargetDiscIdByCurDiscIdAndTargetSide(0x44, 1));
+	ASSERT_EQ(43,GetTargetDiscIdByCurDiscIdAndTargetSide(43, 0));
+	ASSERT_EQ(43,GetTargetDiscIdByCurDiscIdAndTargetSide(43, 1));
+	ASSERT_EQ(43,GetTargetDiscIdByCurDiscIdAndTargetSide(44, 0));
+	ASSERT_EQ(43,GetTargetDiscIdByCurDiscIdAndTargetSide(44, 1));
 
-	ASSERT_EQ(0x44,GetTargetDiscIdByCurDiscIdAndTargetSide(0x43, 2));
-	ASSERT_EQ(0x44,GetTargetDiscIdByCurDiscIdAndTargetSide(0x44, 2));
+	ASSERT_EQ(44,GetTargetDiscIdByCurDiscIdAndTargetSide(43, 2));
+	ASSERT_EQ(44,GetTargetDiscIdByCurDiscIdAndTargetSide(44, 2));
 
 	// unknown
-	ASSERT_EQ(0x99,GetTargetDiscIdByCurDiscIdAndTargetSide(0x99, 0));
-	ASSERT_EQ(0x99,GetTargetDiscIdByCurDiscIdAndTargetSide(0x99, 1));
-	ASSERT_EQ(0x99,GetTargetDiscIdByCurDiscIdAndTargetSide(0x99, 2));
+	ASSERT_EQ(99,GetTargetDiscIdByCurDiscIdAndTargetSide(99, 0));
+	ASSERT_EQ(99,GetTargetDiscIdByCurDiscIdAndTargetSide(99, 1));
+	ASSERT_EQ(99,GetTargetDiscIdByCurDiscIdAndTargetSide(99, 2));
 }
 
 TEST_F(LD700Deps, GetDiscSideByDiscId)
 {
 	// side 1's
-	ASSERT_EQ(1,GetDiscSideByDiscId(0x61));
-	ASSERT_EQ(1,GetDiscSideByDiscId(0x43));
+	ASSERT_EQ(1,GetDiscSideByDiscId(61));
+	ASSERT_EQ(1,GetDiscSideByDiscId(43));
 
 	// side 2's
-	ASSERT_EQ(2,GetDiscSideByDiscId(0x62));
-	ASSERT_EQ(2,GetDiscSideByDiscId(0x44));
+	ASSERT_EQ(2,GetDiscSideByDiscId(62));
+	ASSERT_EQ(2,GetDiscSideByDiscId(44));
 
 	// unknown
-	ASSERT_EQ(0,GetDiscSideByDiscId(0x99));
+	ASSERT_EQ(0,GetDiscSideByDiscId(99));
 }
 
 TEST_F(LD700Deps, OnFlipDiscHeld_ShouldEject)
 {
-	LDPCStatus_t stat = LDPC_PLAYING;	// arbitraary
 	LD700Status_t statLD700 = LD700_PLAYING;	// must not be ejected
 
-	EXPECT_CALL(m_mockLdpc, GetStatus()).WillRepeatedly(Return(stat));
-	EXPECT_CALL(m_mockLD700Callbacks, ConvertStatus(stat)).WillRepeatedly(Return(statLD700));
 	EXPECT_CALL(m_mockLD700Callbacks, Eject());
 
-	OnFlipDiscHeld();
+	OnFlipDiscHeld(statLD700);
 }
 
 TEST_F(LD700Deps, OnFlipDiscHeld_ShouldInsertTray)
 {
-	LDPCStatus_t stat = LDPC_STOPPED;	// arbitraary
 	LD700Status_t statLD700 = LD700_TRAY_EJECTED;	// must be ejected
-	uint8_t u8ActiveDiscId = 0x43;	// TQ hal side 1
+	uint8_t u8ActiveDiscId = 61;	// TQ hal side 1
 
-	EXPECT_CALL(m_mockLdpc, GetStatus()).WillRepeatedly(Return(stat));
-	EXPECT_CALL(m_mockLD700Callbacks, ConvertStatus(stat)).WillRepeatedly(Return(statLD700));
 	EXPECT_CALL(m_mockSettings, GetActiveDiscIdMemory()).WillRepeatedly(Return(u8ActiveDiscId));
 	EXPECT_CALL(m_mockDiscSwitch, Initiate(u8ActiveDiscId));	// if they are holding the button, they are trying to insert the disc, not flip it
 
-	OnFlipDiscHeld();
+	OnFlipDiscHeld(statLD700);
 }
 
 TEST_F(LD700Deps, OnFlipDiscPressed_AlreadyEjected)
 {
-	LDPCStatus_t stat = LDPC_STOPPED;	// arbitraary
 	LD700Status_t statLD700 = LD700_TRAY_EJECTED;	// must be ejected
-	uint8_t u8ActiveDiscId = 0x43;	// TQ hal side 1
+	uint8_t u8ActiveDiscId = 61;	// TQ hal side 1
 
-	EXPECT_CALL(m_mockLdpc, GetStatus()).WillRepeatedly(Return(stat));
-	EXPECT_CALL(m_mockLD700Callbacks, ConvertStatus(stat)).WillRepeatedly(Return(statLD700));
 	EXPECT_CALL(m_mockSettings, GetActiveDiscIdMemory()).WillRepeatedly(Return(u8ActiveDiscId));
 
-	OnFlipDiscPressed();
+	OnFlipDiscPressed(statLD700);
 	ASSERT_EQ(2, GetLD700CandidateSide());	// first tap should take is to side 2
 
-	OnFlipDiscPressed();
+	OnFlipDiscPressed(statLD700);
 	ASSERT_EQ(1, GetLD700CandidateSide());	// second tap should take is to side 2
 }
 
 TEST_F(LD700Deps, OnFlipDiscPressed_NotEjected)
 {
-	LDPCStatus_t stat = LDPC_STOPPED;	// arbitraary
 	LD700Status_t statLD700 = LD700_STOPPED;	// must not be ejected
-	uint8_t u8ActiveDiscId = 0x43;	// TQ hal side 1
+	uint8_t u8ActiveDiscId = 61;	// TQ hal side 1
 
-	EXPECT_CALL(m_mockLdpc, GetStatus()).WillRepeatedly(Return(stat));
-	EXPECT_CALL(m_mockLD700Callbacks, ConvertStatus(stat)).WillRepeatedly(Return(statLD700));
 	EXPECT_CALL(m_mockSettings, GetActiveDiscIdMemory()).WillRepeatedly(Return(u8ActiveDiscId));
 
 	// nothing should change as this is repeatedly pressed
-	OnFlipDiscPressed();
+	OnFlipDiscPressed(statLD700);
 	ASSERT_EQ(1, GetLD700CandidateSide());
-	OnFlipDiscPressed();
+	OnFlipDiscPressed(statLD700);
 	ASSERT_EQ(1, GetLD700CandidateSide());
 }
 

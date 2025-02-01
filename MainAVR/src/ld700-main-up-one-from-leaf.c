@@ -3,6 +3,7 @@
 #include "timer-global.h"	// for button debouncing
 #include "ld700-main-deps.h"	// for OnFlipDiscHeld, etc.
 #include "common-ldp.h"	// for vsync counter
+#include "settings.h"	// for getting active disc id
 
 /////////////////////////////////////////////////////////////////
 
@@ -20,8 +21,8 @@ static uint16_t g_u16FlipDiscSlowTimerStart;
 // number counter must be to count as legit and not just random noise
 #define PRESSED_THRESHOLD 200
 
-// * 2 for 2 seconds, slow timer is cpu frequency divided by 1024 (timer divider) and then 256 (8-bit range)
-#define HELD_THRESHOLD ((MY_F_CPU / 1024 / 256) * 2)
+// * 1 for 2 seconds, slow timer is cpu frequency divided by 1024 (timer divider) and then 256 (8-bit range)
+#define HELD_THRESHOLD ((MY_F_CPU / 1024 / 256) * 1)
 
 static uint8_t g_bLD700OneSideLEDIsOn;
 
@@ -38,7 +39,7 @@ void ld700_up_one_from_leaf_reset()
 	g_bLD700OneSideLEDIsOn = 0;
 }
 
-void ld700_button_think()
+void ld700_button_think(LD700Status_t status)
 {
 	uint8_t u8TimerVal = GET_GLOBAL_TIMER_VALUE();	// this may change each time its read so we only want to read it once to be consistent
 	uint8_t u8TimerDiffSinceStart = (uint8_t) (u8TimerVal - g_u8FlipDiscTimerStart);
@@ -69,7 +70,7 @@ void ld700_button_think()
 		else if ((!g_bFlipDiscHeldEventFired) && (u16SlowTimerDiffSinceStart > HELD_THRESHOLD))
 		{
 			// do held event
-			OnFlipDiscHeld();
+			OnFlipDiscHeld(status);
 			g_bFlipDiscHeldEventFired++;	// make sure this doesn't happen more than once
 			g_bFlipDiscPressedEventLatched = 0;	// make sure press event doesn't fire when button is released because the user intended to hold the button, not press it quickly.
 		}
@@ -84,7 +85,7 @@ void ld700_button_think()
 			if (g_bFlipDiscPressedEventLatched)
 			{
 				// do pressed event
-				OnFlipDiscPressed();
+				OnFlipDiscPressed(status);
 				g_bFlipDiscPressedEventLatched = 0;	// make sure this doesn't get called more than once
 			}
 
@@ -95,38 +96,58 @@ void ld700_button_think()
 }
 
 // should only be called once per vsync
-void ld700_on_vblank()
+void ld700_on_vblank(LD700Status_t status)
 {
-	if (common_get_3bit_vsync_counter() == 0)
+	uint8_t u8Side;
+
+	// we blink if tray is ejected
+	if (status == LD700_TRAY_EJECTED)
 	{
-		// if we're blinking, we want to show the candidate that we will change to.  Otherwise we want to show the disc that's inserted.
-		uint8_t u8Side = GetLD700CandidateSide();
-
-		// blink the LED so we know the interrupt is working
-		g_bLD700OneSideLEDIsOn ^= 1;	// toggle
-
-       	// PA5: Side 2 LED
-		// PA6: Side 1 LED (if SSR is enabled)
-
-		// easy to turn both LEDs off if neither should be on
-		if (!g_bLD700OneSideLEDIsOn)
+		// we blink when this counter is 0, so that the user can actually see the blinking take place
+		if (common_get_3bit_vsync_counter() == 0)
 		{
-			PORTA &= ~((1 << PA5)|(1 << PA6));
+			// if we're blinking, we want to show the candidate that we will change to.  Otherwise we want to show the disc that's inserted.
+			u8Side = GetLD700CandidateSide();
+
+			// blink the LED so we know the interrupt is working
+			g_bLD700OneSideLEDIsOn ^= 1;	// toggle
+
+       		// PA5: Side 2 LED
+			// PA6: Side 1 LED (if SSR is enabled)
+
+			// easy to turn both LEDs off if neither should be on
+			if (!g_bLD700OneSideLEDIsOn)
+			{
+				PORTA &= ~((1 << PA5)|(1 << PA6));
+				return;
+			}
+			// else we have a common condition later in this method that will do what we want
 		}
-		else if (u8Side == 1)
-        {
-			PORTA &= ~(1 << PA5);
-			PORTA |= (1 << PA6);
-        }
-        else if (u8Side == 2)
-        {
-			PORTA &= ~(1 << PA6);
-			PORTA |= (1 << PA5);
-        }
-        // else disc is unknown so we'll illuminate both LEDs just so the user knows something is wrong
-        else
+		// else we are not taking any action for now; we want the user to be able to see the blinking
+		else
 		{
-			PORTA |= ((1 << PA5)|(1 << PA6));
+			return;
 		}
+	}
+	// else tray is inserted so we hold a solid color
+	else
+	{
+		u8Side = GetDiscSideByDiscId(GetActiveDiscIdMemory());
+	}
+
+	if (u8Side == 1)
+	{
+		PORTA &= ~(1 << PA5);
+		PORTA |= (1 << PA6);
+	}
+	else if (u8Side == 2)
+	{
+		PORTA &= ~(1 << PA6);
+		PORTA |= (1 << PA5);
+	}
+	// else disc is unknown so we'll illuminate both LEDs just so the user knows something is wrong
+	else
+	{
+		PORTA |= ((1 << PA5)|(1 << PA6));
 	}
 }

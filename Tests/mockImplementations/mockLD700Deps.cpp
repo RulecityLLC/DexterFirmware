@@ -12,13 +12,17 @@ uint8_t GetLD700CandidateSide()
 	return g_pInstance->GetLD700CandidateSide();
 }
 
-void OnFlipDiscPressed()
+void OnFlipDiscPressed(LD700Status_t status)
 {
-	g_pInstance->OnFlipDiscPressed();
+	g_pInstance->OnFlipDiscPressed(status);
 }
 
-void OnFlipDiscHeld()
+void OnFlipDiscHeld(LD700Status_t status)
 {
-	g_pInstance->OnFlipDiscHeld();
+	g_pInstance->OnFlipDiscHeld(status);
 }
 
+uint8_t GetDiscSideByDiscId(uint8_t u8DiscId)
+{
+	return g_pInstance->GetDiscSideByDiscId(u8DiscId);
+}
