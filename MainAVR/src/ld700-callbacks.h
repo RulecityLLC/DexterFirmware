@@ -2,6 +2,7 @@
 #define LD700_CALLBACKS_H
 
 #include <ldp-in/ld700-interpreter.h>
+#include <ldp-abst/ldpc.h>	// LDPCStatus_t
 
 void ld700_setup_callbacks();
 LD700Status_t ld700_convert_status(LDPCStatus_t status);

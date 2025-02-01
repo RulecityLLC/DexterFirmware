@@ -1,9 +1,7 @@
-#include <avr/io.h> 
-//#include <avr/interrupt.h>
+#include <avr/io.h>
 #include <string.h>
 #include "vldp-avr.h"
 #include <ldp-abst/ldpc.h>
-//#include <ldp-in/ld700-interpreter.h>
 #include "ld700-common.h"	// to set up the ld700_cycles struct
 #include "ld700-callbacks.h"	// to call the setup callback method
 #include "protocol.h"
@@ -62,6 +60,7 @@ volatile uint8_t g_ld700_u8FinishedByteReady = 0;
 void ld700_main_loop()
 {
 	uint8_t u8NextField = 0;
+	LD700Status_t ld700status;
 	
 	// so we can clean-up ourselves when we exit
 	uint8_t u8DDRAStored = DDRA;
@@ -89,6 +88,8 @@ void ld700_main_loop()
 	DDRA |= ((1 << PA5)|(1 << PA6)|(1 << PA7));
 
 	ld700_setup_callbacks();
+
+	ENABLE_OPTO_RELAY();		// needed so PA6 works
 
 	SETUP_LD700_INT();
 
@@ -136,10 +137,13 @@ void ld700_main_loop()
 				// set flag back to 0 so we can detect when the next byte has come in
 				g_ld700_u8FinishedByteReady = 0;				
 			}
-			
+
+			// this may be used several times so it's more efficient to only query it once
+			ld700status = ld700_convert_status(ldpc_get_status());
+
 			// use idle time to process low-priority tasks
-			ld700_button_think();
-			ld700_idle_think();
+			ld700_button_think(ld700status);
+			ld700_idle_think(ld700status);
 			idle_think();
 			
  			// if user presses MODE button then abort (this is needed in case we have no video signal plugged in)
@@ -175,18 +179,22 @@ void ld700_main_loop()
 		// do common operations
 		on_video_field();
 
+		// querying again just in case it changed due to vblank
+		ld700status = ld700_convert_status(ldpc_get_status());
+
 		// do interpreter stuff that happens after vblank.
 		// I put this after on_video_field so that performance of the video fields to the media server stays fairly constant.
-		ld700i_on_vblank(ld700_convert_status(ldpc_get_status()));
+		ld700i_on_vblank(ld700status);
 		
-		ld700_on_vblank();
+		ld700_on_vblank(ld700status);
 	}
 
 done:
 
 	// TODO : check to see if we're in the middle of a disc switch and clean-up from that properly
 
-	// clean-up	
+	// clean-up
+	DISABLE_OPTO_RELAY();
 	DISABLE_LD700_INT();
 	DISABLE_CTC_INT();
 	TCCR1B = u8TCCRB1BStored;

@@ -62,9 +62,8 @@ uint8_t GetLD700CandidateSide()
 	return u8Side;
 }
 
-void OnFlipDiscPressed()
+void OnFlipDiscPressed(LD700Status_t status)
 {
-	LD700Status_t status = ld700_convert_status(ldpc_get_status());
 	uint8_t u8Side = GetLD700CandidateSide();
 
 	// we only respond to button press if the disc is already ejected.  We want the user to be more intentional about whether they are wanting to manually eject the disc.
@@ -85,10 +84,8 @@ void OnFlipDiscPressed()
 	}
 }
 
-void OnFlipDiscHeld()
+void OnFlipDiscHeld(LD700Status_t status)
 {
-	LD700Status_t status = ld700_convert_status(ldpc_get_status());
-	
 	// if they hold the button down while the disc is inserted, then we want to eject the tray
 	if (status != LD700_TRAY_EJECTED)
 	{
@@ -112,12 +109,12 @@ uint8_t GetDiscSideByDiscId(uint8_t u8DiscId)
 
     switch (u8DiscId)
     {
-    case 0x61:	// thayer's quest halcyon side 1
-    case 0x43:	// NFL football halcyon side 1
+    case 61:	// thayer's quest halcyon side 1
+    case 43:	// NFL football halcyon side 1
     	u8Result = 1;
         break;
-    case 0x62:	// thayer's quest halcyon side 2
-    case 0x44:	// NFL football halcyon side 2
+    case 62:	// thayer's quest halcyon side 2
+    case 44:	// NFL football halcyon side 2
     	u8Result = 2;
         break;
     default:	// unknown disc id
@@ -133,26 +130,26 @@ uint8_t GetTargetDiscIdByCurDiscIdAndTargetSide(uint8_t u8DiscIdCur, uint8_t u8S
 
     switch (u8DiscIdCur)
     {
-    case 0x61:	// thayer's quest halcyon side 1
-    case 0x62:	// thayer's quest halcyon side 2
+    case 61:	// thayer's quest halcyon side 1
+    case 62:	// thayer's quest halcyon side 2
     	if (u8SideTarget == 2)
 		{
-			u8Result = 0x62;
+			u8Result = 62;
 		}
 		else
 		{
-			u8Result = 0x61;
+			u8Result = 61;
 		}
         break;
-    case 0x43:	// NFL football halcyon side 1
-    case 0x44:	// NFL football halcyon side 2
+    case 43:	// NFL football halcyon side 1
+    case 44:	// NFL football halcyon side 2
     	if (u8SideTarget == 2)
 		{
-			u8Result = 0x44;
+			u8Result = 44;
 		}
 		else
 		{
-			u8Result = 0x43;
+			u8Result = 43;
 		}
         break;
     default:	// unknown disc id
