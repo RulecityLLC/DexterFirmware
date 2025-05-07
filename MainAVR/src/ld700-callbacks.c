@@ -15,6 +15,7 @@ void ld700_setup_callbacks()
 	g_ld700i_eject = ld700_eject;
 	g_ld700i_begin_search = common_ldp_begin_search;
 	g_ld700i_change_audio = ld700_change_audio;
+	g_ld700i_change_audio_squelch = ld700_change_audio_squelch;
 	g_ld700i_on_ext_ack_changed = ld700_on_ext_ack_changed;
 	g_ld700i_error = ld700_error;
 }
@@ -113,6 +114,11 @@ void ld700_change_audio(LD700_BOOL bEnableLeft, LD700_BOOL bEnableRight)
 {
 	ldpc_change_audio(0, bEnableLeft);
 	ldpc_change_audio(1, bEnableRight);
+}
+
+void ld700_change_audio_squelch(LD700_BOOL bSquelched)
+{
+	ldpc_set_audio_squelched(bSquelched ? LDPC_AUDIOSQUELCH_FORCE_ON : LDPC_AUDIOSQUELCH_NO_CHANGE);
 }
 
 void ld700_error(LD700ErrCode_t err, uint8_t u8Val)
