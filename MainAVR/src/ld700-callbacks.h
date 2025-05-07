@@ -14,6 +14,7 @@ void ld700_close_tray();
 void ld700_eject();
 void ld700_on_ext_ack_changed(LD700_BOOL bActive);
 void ld700_change_audio(LD700_BOOL bEnableLeft, LD700_BOOL bEnableRight);
+void ld700_change_audio_squelch(LD700_BOOL bSquelched);
 void ld700_error(LD700ErrCode_t err, uint8_t u8Val);
 
 #endif // LD700_CALLBACKS_H
