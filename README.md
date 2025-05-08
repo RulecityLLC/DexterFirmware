@@ -63,3 +63,9 @@ Now you can use your favorite text editor to examine the generated assembly lang
 ```
 nano -w CMakeFiles/avr_main.dir/ld700-main.c.s
 ```
+## Building/debugging firmware
+
+I use a command line like this from the root folder of this repo:
+```
+docker run --rm -v ${PWD}:/dexter-firmware -v /c/projects/LaserdiscPlayerCommandInterpreters:/ldp-in -v /c/projects/LaserDiscPlayerAbstract:/ldp-abst -ti mpownby/dexter-builder /bin/bash
+```
