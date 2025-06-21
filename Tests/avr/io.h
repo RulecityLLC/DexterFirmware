@@ -21,6 +21,11 @@
 #define PA6	6
 #define PA7	7
 
+#define PB6 6
+
+#define PC0 0
+#define PC1 1
+
 #define PCIE0	0
 
 #define PCINT0	0
@@ -52,6 +57,12 @@ public:
 extern ReadWriteRegister<uint8_t> *g_pDDRAPtr;
 #define DDRA *g_pDDRAPtr
 
+extern ReadWriteRegister<uint8_t> *g_pDDRBPtr;
+#define DDRB *g_pDDRBPtr
+
+extern ReadWriteRegister<uint8_t> *g_pDDRCPtr;
+#define DDRC *g_pDDRCPtr
+
 extern ReadWriteRegister<uint8_t> *g_pEIFRPtr;
 #define EIFR *g_pEIFRPtr
 
@@ -67,8 +78,17 @@ extern ReadOnlyRegister<uint8_t> *g_pPINAPtr;
 extern ReadOnlyRegister<uint8_t> *g_pPINBPtr;
 #define PINB *g_pPINBPtr
 
+extern ReadOnlyRegister<uint8_t> *g_pPINCPtr;
+#define PINC *g_pPINCPtr
+
 extern ReadWriteRegister<uint8_t> *g_pPORTAPtr;
 #define PORTA *g_pPORTAPtr
+
+extern ReadWriteRegister<uint8_t> *g_pPORTBPtr;
+#define PORTB *g_pPORTBPtr
+
+extern ReadWriteRegister<uint8_t> *g_pPORTCPtr;
+#define PORTC *g_pPORTCPtr
 
 extern ReadWriteRegister<uint8_t> *g_pTCCR1BPtr;
 #define TCCR1B *g_pTCCR1BPtr
