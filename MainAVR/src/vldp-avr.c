@@ -155,6 +155,20 @@ int main (void)
 		}
 		// else do nothing special
 
+		// if we were previously using one of these types, Dexter may be using an adapter plugged into the DB25 port that has hardware to help us verify that the claimed player type is actually the one being used.
+		// This is a safety feature so that we don't drive the wrong pins and cause hardware conflicts.
+		// So we double-check that the type that we were using before is still current.
+		if ((ldpType == LDP_LDP1000A) || (ldpType == LDP_LD700))
+		{
+			ldpType = LDP_OTHER;	// this will force an auto-detection of the 'other' mode
+		}
+
+		// At this point, if the ldp type is 'other' then we need to do further auto-detection to figure out the actual player type so that we can start that player type's code.
+		if (ldpType == LDP_OTHER)
+		{
+			ldpType = detect_other_mode();
+		}
+
 		// to detect whether we are about to change the ldp type
 		ldpTypeOld = GetActiveLDPType();
 
@@ -233,37 +247,6 @@ int main (void)
 			break;
 		case LDP_LD700:
 			ld700_main_loop();
-			break;
-		case LDP_OTHER:
-			// 'Other' mode examines some pins to determine which adapter is plugged into the DB25 port
-			// PC1 (DB12) and PC0 (DB11) values when read with pull-ups enabled
-			// 11: LDP-1000A
-			// 10: LD700 (Halcyon)
-			{
-				LDPType detectedType;
-				uint8_t u8DDRCSaved = DDRC;
-				uint8_t u8PORTCSaved = PORTC;
-				DDRC &= ~((1 << PC0) | (1 << PC1));	// go into input mode for these pins
-				PORTC |= ((1 << PC0) | (1 << PC1));	// enable pull-ups
-				
-				// if PC0 is connected to GND then it must be LD700 as that's the only player we currently support with that configuration
-				if ((PINC & (1 << PC0)) == 0)
-				{
-					detectedType = LDP_LD700;
-				}
-				// else the pin is raised, so the only player we currently support is LDP-1000A
-				else
-				{
-					detectedType = LDP_LDP1000A;
-				}
-				
-				// clean-up after ourselves
-				PORTC = u8PORTCSaved;
-				DDRC = u8DDRCSaved;
-				
-				if (detectedType == LDP_LDP1000A) ldp1000_main_loop(LDP_LDP1000A);
-				else ld700_main_loop();
-			}
 			break;
 		}
 
