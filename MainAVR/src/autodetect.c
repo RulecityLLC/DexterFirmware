@@ -8,10 +8,8 @@
 #include "led_driver.h"
 #include "ldv1000-main.h"
 #include "pr7820-main.h"
+#include "autodetect-deps.h"
 #include "autodetect.h"
-
-// how many times we read the same value before we decide that the value is stable
-#define ITERATION_THRESHOLD 20
 
 void ldv1000_or_pr7820_main_loop()
 {
@@ -105,48 +103,4 @@ void probably_pr7820_mode()
 
 	// TODO : we could get more fancy and verify that PR-7820 is the actual type
 	SetAutodetectedLDPType(LDP_PR7820);
-}
-
-uint8_t IsPin11Raised()
-{
-	uint8_t u8RaisedCounter, u8LoweredCounter;
-	uint8_t bDone = 0;
-
-	// go until we see the line consistently low or consistently high (no pull-up bounce)
-	while (!bDone)
-	{
-		u8RaisedCounter = 0;
-		u8LoweredCounter = 0;
-
-		if ((PINC & (1 << PC0)) == 0)
-		{
-			u8RaisedCounter = 0;
-			while ((PINC & (1 << PC0)) == 0)
-			{
-				u8LoweredCounter++;
-
-				if (u8LoweredCounter == ITERATION_THRESHOLD)
-				{
-					bDone++;
-					break;
-				}
-			}
-		}
-		else
-		{
-			u8LoweredCounter = 0;
-			while ((PINC & (1 << PC0)) == 1)
-			{
-				u8RaisedCounter++;
-
-				if (u8RaisedCounter == ITERATION_THRESHOLD)
-				{
-					bDone++;
-					break;
-				}
-			}
-		}
-	}
-
-	return u8RaisedCounter;
 }

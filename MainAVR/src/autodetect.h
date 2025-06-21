@@ -5,6 +5,5 @@
 void ldv1000_or_pr7820_main_loop();
 void probably_ldv1000_mode();
 void probably_pr7820_mode();
-uint8_t IsPin11Raised();
 
 #endif // AUTODETECT_H
