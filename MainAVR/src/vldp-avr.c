@@ -2,6 +2,7 @@
 #include <avr/io.h> 
 #include <avr/interrupt.h>
 #include "autodetect.h"
+#include "autodetect-deps.h"
 #include "serial.h"
 #include "idle.h"
 #include "vldp-avr.h"

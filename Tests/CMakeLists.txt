@@ -26,7 +26,7 @@ enable_testing()
 # -----------------------------------------------------------------------------------------
 
 set(DEPS_SRCS
-		autodetect.cpp
+		autodetect-deps.cpp
 		ld700_main_isr.cpp
 		ld700_main_isr.h
 		ld700_main_deps.cpp
@@ -35,7 +35,7 @@ set(DEPS_SRCS
 add_library(deps ${DEPS_SRCS})
 
 set(TEST_DEPS_SRCS
-        autodetect_tests.cpp
+		autodetect_deps_tests.cpp
 		ld700_isr_tests.cpp
 		ld700_deps_tests.cpp
 		stdafx.h
@@ -65,9 +65,9 @@ add_executable(test_deps ${TEST_DEPS_SRCS})
 
 # force C files to be built as C++ files so that they can depend upon our mocks
 
-add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/autodetect.cpp
-                   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../MainAVR/src/autodetect.c ${CMAKE_SOURCE_DIR}/autodetect.cpp
-					DEPENDS ${CMAKE_SOURCE_DIR}/../MainAVR/src/autodetect.c)
+add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/autodetect-deps.cpp
+                   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../MainAVR/src/autodetect-deps.c ${CMAKE_SOURCE_DIR}/autodetect-deps.cpp
+					DEPENDS ${CMAKE_SOURCE_DIR}/../MainAVR/src/autodetect-deps.c)
 
 add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/ld700_main_isr.cpp
                    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/ld700_main_isr.c ${CMAKE_SOURCE_DIR}/ld700_main_isr.cpp

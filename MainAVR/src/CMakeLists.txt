@@ -5,6 +5,8 @@ enable_language(C ASM)
 set(AVR_MAIN_SRCS
 	autodetect.c
 	autodetect.h
+	autodetect-deps.c
+	autodetect-deps.h
 	buttons.c
 	buttons.h
 	crc.c

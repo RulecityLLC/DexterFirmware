@@ -1,7 +1,7 @@
 #include <settings.h>
 
 #include "stdafx.h"
-#include "../MainAVR/src/autodetect.h"
+#include "../MainAVR/src/autodetect-deps.h"
 #include "mockImplementations/mockIdle.h"
 #include "mockImplementations/mockProtocol.h"
 
@@ -9,7 +9,7 @@ using testing::Return;
 using testing::Mock;
 using testing::InSequence;
 
-class Autodetect : public ::testing::Test
+class AutodetectDeps : public ::testing::Test
 {
 public:
 	void SetUp() override
@@ -43,7 +43,41 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-TEST_F(Autodetect, DetectOtherModeLD700)
+TEST_F(AutodetectDeps, IsPin11RaisedYes)
+{
+	// ARRANGE
+
+	EXPECT_CALL(m_PINC, GetOp())
+		.WillOnce(Return(0))
+		.WillRepeatedly(Return(1 << PC0));
+
+	// ACT
+
+	uint8_t actual = IsPin11Raised();
+
+	// ASSERT
+
+	ASSERT_NE(0, actual);
+}
+
+TEST_F(AutodetectDeps, IsPin11RaisedNo)
+{
+	// ARRANGE
+
+	EXPECT_CALL(m_PINC, GetOp())
+		.WillOnce(Return(1 << PC0))
+		.WillRepeatedly(Return(0));
+
+	// ACT
+
+	uint8_t actual = IsPin11Raised();
+
+	// ASSERT
+
+	ASSERT_EQ(0, actual);
+}
+
+TEST_F(AutodetectDeps, DetectOtherModeLD700)
 {
 	// ARRANGE
 
@@ -71,7 +105,7 @@ TEST_F(Autodetect, DetectOtherModeLD700)
 	ASSERT_EQ(LDP_LD700, actual);
 }
 
-TEST_F(Autodetect, DetectOtherModeLDP1000A)
+TEST_F(AutodetectDeps, DetectOtherModeLDP1000A)
 {
 	// ARRANGE
 
