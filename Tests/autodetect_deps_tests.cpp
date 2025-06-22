@@ -47,9 +47,13 @@ TEST_F(AutodetectDeps, IsPin11RaisedYes)
 {
 	// ARRANGE
 
+	int call_count = 0;
+
 	EXPECT_CALL(m_PINC, GetOp())
-		.WillOnce(Return(0))
-		.WillRepeatedly(Return(1 << PC0));
+		.WillRepeatedly(testing::Invoke([&call_count]()
+		{
+			return (call_count++ < 20) ? 0 : 1 << PC0;
+		}));
 
 	// ACT
 
@@ -64,9 +68,13 @@ TEST_F(AutodetectDeps, IsPin11RaisedNo)
 {
 	// ARRANGE
 
+	int call_count = 0;
+
 	EXPECT_CALL(m_PINC, GetOp())
-		.WillOnce(Return(1 << PC0))
-		.WillRepeatedly(Return(0));
+		.WillRepeatedly(testing::Invoke([&call_count]()
+		{
+			return (call_count++ < 20) ? 1 << PC0 : 0;
+		}));
 
 	// ACT
 
