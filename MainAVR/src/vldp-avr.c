@@ -1,8 +1,8 @@
 #include <stdio.h>
+#include <string.h>	// for strcat
 #include <avr/io.h> 
 #include <avr/interrupt.h>
 #include "autodetect.h"
-#include "autodetect-deps.h"
 #include "serial.h"
 #include "idle.h"
 #include "vldp-avr.h"
@@ -134,7 +134,18 @@ int main (void)
 					SetAutodetectedLDPType(LDP_LDV1000);	// a default
 					break;
 				case AUTODETECT_LDV1000_OR_PR7820:
-					ldv1000_or_pr7820_main_loop();
+					{
+						char s[30];
+						char s1[10];
+
+						ldpTypeAutodetected = detect_ldv1000_or_pr7820();
+						SetAutodetectedLDPType(ldpTypeAutodetected);
+						
+						string_to_buf(s, STRING_AUTODETECTED);
+						string_to_buf(s1, (ldpTypeAutodetected == LDP_LDV1000) ? STRING_LDV1000 : STRING_PR7820);
+						strcat(s, s1);
+						LOG(s);
+					}
 					break;
 				}
 			}
