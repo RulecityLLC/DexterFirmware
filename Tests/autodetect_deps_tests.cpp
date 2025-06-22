@@ -57,7 +57,7 @@ TEST_F(AutodetectDeps, IsPin11RaisedYes)
 
 	// ACT
 
-	uint8_t actual = IsPin11Raised();
+	uint8_t actual = IsPC0Raised();
 
 	// ASSERT
 
@@ -78,65 +78,9 @@ TEST_F(AutodetectDeps, IsPin11RaisedNo)
 
 	// ACT
 
-	uint8_t actual = IsPin11Raised();
+	uint8_t actual = IsPC0Raised();
 
 	// ASSERT
 
 	ASSERT_EQ(0, actual);
-}
-
-TEST_F(AutodetectDeps, DetectOtherModeLD700)
-{
-	// ARRANGE
-
-	{
-		uint8_t u8DDRCInitialVal = 0xFF;
-		uint8_t u8PORTCInitialVal = 0;
-		InSequence dummy;
-
-		EXPECT_CALL(m_DDRC, GetOp()).WillOnce(Return(u8DDRCInitialVal));
-		EXPECT_CALL(m_PORTC, GetOp()).WillOnce(Return(u8PORTCInitialVal));
-
-		EXPECT_CALL(m_DDRC, AndEqualsOp(~((1 << PC0) | (1 << PC1))));
-		EXPECT_CALL(m_PORTC, OrEqualsOp(((1 << PC0) | (1 << PC1))));
-
-		EXPECT_CALL(m_mockIdle, IdleThink());
-
-		EXPECT_CALL(m_PINC, GetOp()).WillOnce(Return(0));
-
-		EXPECT_CALL(m_PORTC, AssignOp(u8PORTCInitialVal));
-		EXPECT_CALL(m_DDRC, AssignOp(u8DDRCInitialVal));
-	}
-
-	LDPType actual = detect_other_mode();
-
-	ASSERT_EQ(LDP_LD700, actual);
-}
-
-TEST_F(AutodetectDeps, DetectOtherModeLDP1000A)
-{
-	// ARRANGE
-
-	{
-		uint8_t u8DDRCInitialVal = 0xFF;
-		uint8_t u8PORTCInitialVal = 0;
-		InSequence dummy;
-
-		EXPECT_CALL(m_DDRC, GetOp()).WillOnce(Return(u8DDRCInitialVal));
-		EXPECT_CALL(m_PORTC, GetOp()).WillOnce(Return(u8PORTCInitialVal));
-
-		EXPECT_CALL(m_DDRC, AndEqualsOp(~((1 << PC0) | (1 << PC1))));
-		EXPECT_CALL(m_PORTC, OrEqualsOp(((1 << PC0) | (1 << PC1))));
-
-		EXPECT_CALL(m_mockIdle, IdleThink());
-
-		EXPECT_CALL(m_PINC, GetOp()).WillOnce(Return(3));
-
-		EXPECT_CALL(m_PORTC, AssignOp(u8PORTCInitialVal));
-		EXPECT_CALL(m_DDRC, AssignOp(u8DDRCInitialVal));
-	}
-
-	LDPType actual = detect_other_mode();
-
-	ASSERT_EQ(LDP_LDP1000A, actual);
 }

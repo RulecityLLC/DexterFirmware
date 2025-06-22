@@ -98,20 +98,26 @@ endif()
 # -----------------------------------------------------------------------------------------
 
 set(LIB_ONE_UP_FROM_LEAF_SRCS
+		autodetect.cpp
 		ld700_main_up_one_from_leaf.cpp
 )
 
 add_library(up_one_from_leaf ${LIB_ONE_UP_FROM_LEAF_SRCS})
 
 set(TEST_ONE_UP_FROM_LEAF_SRCS
+		autodetect_tests.cpp
 		ld700_main_up_one_from_leaf_tests.cpp
 		mocks.h
+		mockImplementations/mockAutodetectDeps.cpp
+		mockImplementations/mockAutodetectDeps.h
 		mockImplementations/mockLdpc.cpp
 		mockImplementations/mockLdpc.h
 		mockImplementations/mockLD700Callbacks.cpp
 		mockImplementations/mockLD700Callbacks.h
 		mockImplementations/mockDiscSwitch.cpp
 		mockImplementations/mockDiscSwitch.h
+		mockImplementations/mockProtocol.cpp
+		mockImplementations/mockProtocol.h
 		mockImplementations/mockSettings.cpp
 		mockImplementations/mockSettings.h
 		mockImplementations/mockStrings.cpp
@@ -128,6 +134,10 @@ set(TEST_ONE_UP_FROM_LEAF_SRCS
 add_executable(test_up_one_from_leaf ${TEST_ONE_UP_FROM_LEAF_SRCS})
 
 # force C files to be built as C++ files so that they can depend upon our mocks
+add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/autodetect.cpp
+                   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../MainAVR/src/autodetect.c ${CMAKE_SOURCE_DIR}/autodetect.cpp
+					DEPENDS ${CMAKE_SOURCE_DIR}/../MainAVR/src/autodetect.c)
+
 add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/ld700_main_up_one_from_leaf.cpp
                    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../MainAVR/src/ld700-main-up-one-from-leaf.c ${CMAKE_SOURCE_DIR}/ld700_main_up_one_from_leaf.cpp
 					DEPENDS ${CMAKE_SOURCE_DIR}/../MainAVR/src/ld700-main-up-one-from-leaf.c)
