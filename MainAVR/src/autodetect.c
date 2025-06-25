@@ -13,6 +13,11 @@ LDPType detect_ldv1000_or_pr7820()
 	// pin 11 = PC0	(PR-7820 ENTER,  LD-V1000 STATUS')
 	// pin 7 = PC1	(PR-7820 READY, LD-V1000 CMD')
 
+	uint8_t u8DDRBSaved = DDRB;
+	uint8_t u8PORTBSaved = PORTB;
+	uint8_t u8DDRCSaved = DDRC;
+	uint8_t u8PORTCSaved = PORTC;
+
 	DDRC |= (1 << PC1);	// output mode for pin 7
 	PORTC |= (1 << PC1);	// make sure pin 7 is raised (disabled)
 
@@ -53,6 +58,12 @@ LDPType detect_ldv1000_or_pr7820()
 			}
 		}
 	} // end for loop
+
+	// clean-up after ourselves
+	PORTC = u8PORTCSaved;
+	DDRC = u8DDRCSaved;
+	PORTB = u8PORTBSaved;
+	DDRB = u8DDRBSaved;
 
 	return (bPr7820Mode != 0) ? LDP_PR7820 : LDP_LDV1000;
 }
