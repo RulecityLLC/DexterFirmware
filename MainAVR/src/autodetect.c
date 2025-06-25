@@ -5,9 +5,7 @@
 
 LDPType detect_ldv1000_or_pr7820()
 {
-	uint8_t bPin11Raised = 0;
 	uint8_t bPr7820Mode = 0;
-	uint8_t u8LoopCount = 0;
 
 	// pin 17 = PB6	 (PR-7820 INT/EXT', LD-V1000 ENTER')
 	// pin 11 = PC0	(PR-7820 ENTER,  LD-V1000 STATUS')
@@ -24,13 +22,13 @@ LDPType detect_ldv1000_or_pr7820()
 	DDRB &= ~(1 << PB6);	// input mode for pin 17
 	PORTB &= ~(1 << PB6);	// make sure pull-up resistor is disabled
 
-	for (u8LoopCount = 0; u8LoopCount < 2; u8LoopCount++)
+	for (uint8_t u8LoopCount = 0; u8LoopCount < 2; u8LoopCount++)
 	{
 		DDRC &= ~(1 << PC0);	// input mode for pin 11
 		PORTC |= (1 << PC0);	// set pull-up for pin 11
 
 		// go until we see the line consistently low or consistently high (no pull-up bounce)
-		bPin11Raised = IsPC0Raised();
+		uint8_t bPin11Raised = IsPC0Raised();
 
 		// if we saw the line consistently low for a period then we're in PR-7820 mode _for sure_ because we have a pull-up resistor enabled so we know the game PCB is in output mode
 		if (!bPin11Raised)
