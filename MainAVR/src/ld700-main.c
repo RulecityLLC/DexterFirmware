@@ -69,6 +69,12 @@ void ld700_main_loop()
 	uint8_t u8PORTAStored = PORTA;
 	uint8_t u8TCCRB1BStored = TCCR1B;
 
+	uint16_t u16SavedMinSearchDelayMs = commmon_ldp_get_minimum_search_delay_ms();	// to clean up after ourselves when we exit
+	
+	// Halcyon uses a technique of sending two pauses commands about 500ms apart to blank the screen as a visual cue to the user during voice print process.
+	// We want our minimum search delay to be long enough so that non-blanked video is not shown between these two pause commands because that may look like a bug to the user.
+	common_ldp_set_minimum_search_delay_ms(500);
+
 	// Setup 16-bit timer
 	TCCR1B = (1 << CS11) | (1 << WGM12);	// /8 prescaling to fit large timeout values (search datasheet for TCCR1B for details), CTC mode enabled
 
@@ -194,6 +200,7 @@ done:
 	// TODO : check to see if we're in the middle of a disc switch and clean-up from that properly
 
 	// clean-up
+	common_ldp_set_minimum_search_delay_ms(u16SavedMinSearchDelayMs);
 	DISABLE_OPTO_RELAY();
 	DISABLE_LD700_INT();
 	DISABLE_CTC_INT();

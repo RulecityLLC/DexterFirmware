@@ -17,6 +17,9 @@ uint8_t g_u8CurTextOverlayId = 0;
 // minimum number of fields to delay for a seek (some games may need this to be non-zero)
 uint8_t g_u8MinimumSearchDelayFields = 0;
 
+// approximate minimum number of ms to delay for a seek (so caller can retrieve previously set values if they wish)
+uint16_t g_u16MinimumSearchDelayMs = 0;
+
 uint32_t g_u32NextStopcodeField = 0;	// the next absolute field that has a stop code
 uint8_t g_u8OffsetFieldAfterNext = 0;	// the offset to the stopcode field after that (0 if nothing is close)
 
@@ -186,6 +189,14 @@ void common_ldp_set_minimum_search_delay_ms(uint16_t u16DelayMs)
 	// Dividing by 16 is approximately correct (and fast!) since each field is 16.68ms
 	// We assume that a byte is enough to hold this value since no player would have minimum search delay longer than 255 fields.
 	g_u8MinimumSearchDelayFields = u16DelayMs >> 4;
+	
+	// so caller can retrieve this set value later if they wish
+	g_u16MinimumSearchDelayMs = u16DelayMs;
+}
+
+uint16_t commmon_ldp_get_minimum_search_delay_ms()
+{
+	return g_u16MinimumSearchDelayMs;
 }
 
 void common_enable_spinup_delay(uint8_t bEnabled)

@@ -14,6 +14,9 @@ void common_ldp_begin_search(uint32_t u32FrameNum);
 // should be 0 for most players type.  Some games may need it to be non-zero.
 void common_ldp_set_minimum_search_delay_ms(uint16_t u16DelayMs);
 
+// returns the currently set minimum search delay in ms
+uint16_t commmon_ldp_get_minimum_search_delay_ms();
+
 void common_enable_spinup_delay(uint8_t bEnabled);
 
 void common_log_ldpc_status(LDPCStatus_t u8);
