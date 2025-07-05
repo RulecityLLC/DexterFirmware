@@ -16,6 +16,7 @@ void ld700_setup_callbacks()
 	g_ld700i_begin_search = common_ldp_begin_search;
 	g_ld700i_change_audio = ld700_change_audio;
 	g_ld700i_change_audio_squelch = ld700_change_audio_squelch;
+	g_ld700i_get_current_picnum = ldpc_get_cur_frame_num;
 	g_ld700i_on_ext_ack_changed = ld700_on_ext_ack_changed;
 	g_ld700i_error = ld700_error;
 }
