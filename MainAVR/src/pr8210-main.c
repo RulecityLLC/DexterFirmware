@@ -54,6 +54,7 @@ volatile uint8_t g_u8PR8210AVbiDataRaised = 0;
 
 void pr8210_main_loop(LDPType ldptype)
 {
+	uint16_t u16SavedMinSearchDelayMs = commmon_ldp_get_minimum_search_delay_ms();	// to clean up after ourselves when we exit
 	uint8_t g_u8PR8210CurField = 0;
 
 	uint32_t u32VbiLines[3] = { 0, 0, 0};
@@ -273,8 +274,7 @@ done:
 
 	// clean-up
 
-	// revert to default
-	common_ldp_set_minimum_search_delay_ms(0);
+	common_ldp_set_minimum_search_delay_ms(u16SavedMinSearchDelayMs);
 
 	// reset timer registers to defaults
 	TCCR1B = 0;
