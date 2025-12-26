@@ -85,7 +85,7 @@ int main (void)
 	///////////////////
 
 	// give a nice creative "hello" message :)
-	log_string(STRING_AM_HERE);
+	log_string(STRING_AM_HERE_DELETE_THIS);
 
 	// load in our settings from eeprom and use those to start off with
 	load_settings_from_eeprom();
