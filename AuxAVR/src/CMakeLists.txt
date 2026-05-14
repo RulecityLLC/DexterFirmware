@@ -37,9 +37,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.el
 add_custom_command(
     TARGET avr_aux
     POST_BUILD
-	COMMAND ${CMAKE_STRIP} --strip-unneeded ${PROJECT_NAME}.elf
+    COMMAND ${CMAKE_STRIP} --strip-unneeded ${PROJECT_NAME}.elf
     COMMAND ${CMAKE_OBJCOPY} -O ihex -R .eeprom -R .lock -R .signature ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
-	COMMAND ${CMAKE_OBJCOPY} -I ihex ${PROJECT_NAME}.hex -O binary vbi-inject.bin
+    #COMMAND ${CMAKE_OBJCOPY} -I ihex ${PROJECT_NAME}.hex -O binary vbi-inject.bin	# broke on jenkins agent
+    COMMAND ${CMAKE_OBJCOPY} -O binary -R .eeprom -R .lock -R .signature ${PROJECT_NAME}.elf vbi-inject.bin
 )
 
 # to help debug this cmake file.  no harm leaving it here.

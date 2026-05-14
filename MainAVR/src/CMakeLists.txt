@@ -109,7 +109,8 @@ add_custom_command(
 	COMMAND ${CMAKE_OBJCOPY} -O ihex -R .eeprom -R .lock -R .signature vldp-avr.elf vldp-avr.hex
 
 	# vldp-avr.bin is the name of the file that Dexter's media server expects
-	COMMAND ${CMAKE_OBJCOPY} -I ihex vldp-avr.hex -O binary vldp-avr.bin
+	# COMMAND ${CMAKE_OBJCOPY} -I ihex vldp-avr.hex -O binary vldp-avr.bin	# broke on Jenkins agent
+	COMMAND ${CMAKE_OBJCOPY} -O binary -R .eeprom -R .lock -R .signature vldp-avr.elf vldp-avr.bin
 )
 
 # pull in dependencies
