@@ -6,7 +6,7 @@ This document tries to capture the intent behind some of the design decisions I 
 
 There is at least one defect lurking in the Dexter firmware that I never found.  For example, sometimes when changing modes into PR-8210, this mode won't work correctly.  But pressing RESET (after the EEPROM has updated) always fixes it so I never bothered to track this down.
 
-# All of these #ifdef's for REV1/REV2/REV or V1/V2/V3
+# All of these #ifdef's for REV1/REV2/REV3 or V1/V2/V3
 
 Dexter has gone through three major revisions (rev1, rev2, and rev3).
 
