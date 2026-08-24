@@ -10,3 +10,12 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
+cmake-build-debug
+.idea
+build-avr
+build-avr-dbg
+build-avr-release
+build-avr-relwdbg
+build-aux
+build-main
+build_mutation
