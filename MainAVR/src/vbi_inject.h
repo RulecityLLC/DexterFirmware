@@ -12,8 +12,11 @@ The main AVR communicates to the aux AVR at 76800 bps.  However, the aux AVR has
  This means CRC errors are common if the packet size is larger (ie when firmware is being updated).
 To have zero errors, the crystal would need to be 15.9744 MHz.   (12+1)(16*76800) == 15974400
 Firmware updates will often have errors that get caught by the CRC checker.  These bad packets just retry and eventually succeed.  This behavior is by design.
+During normal VBI streaming operation, errors are rare.
 
 I chose 16 MHz intentionally so that the injected VBI has the proper shape (2 uS per bit cell).  The CRC errors during firmware update are a nuisance worth the cost.
+
+I chose 76800 bps instead of 115200 bps to reduce the number of errors that can occur.  76800 is still fast enough for a regular stream of VBI data during normal operation.
 
 */
 
