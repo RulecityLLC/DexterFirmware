@@ -15,10 +15,12 @@ In case that URL becomes unavailable, here is a brief description of the design:
 - The 'media server' in this case is the Raspberry Pi 2 (or other PC-type device) that streams video/audio.
     The media server is only connected to the main AVR's serial lines.  To communicate with the aux AVR, it sends packets to the main AVR which then delivers them to the aux AVR (and vice versa).
 - The AVR's TX/RX buffers are not that big so they can be easily overflowed if the sender spams too much data.
-    Received packets are processed automatically by an ISR.  But nothing will stop you from overflowing the TX buffer by sending too much.  Therefore, keep logging to a minimum.
+    Received packets are processed automatically by an ISR.  But nothing will stop you from overflowing the TX buffer by sending too much too quickly.  Therefore, keep logging to a minimum.
 
 Intent:
-The reason that packets are unreliable (no retry) is because tests have shown that almost all packets are delivered properly anyway, and the current design improves performance and simplifies the implementation.
+The reason that packets are unreliable (no auto-retry) is because tests have shown that almost all packets are delivered properly anyway, and the current design improves performance and simplifies the implementation.
+Retry, if needed, is accomplished by the receiver expecting a packet and not getting it after a timeout period.  The receiver will then request the same packet from the sender again and repeat until it gets what it expects.
+For example, the firmware update process uses a retry method like this.
 The reason for the CRC check: Early in the design, one collaborator suggested that we didn't need a CRC check at all but I'm really glad we added one.
     The CRC check makes it easy to detect corrupt packets and drop them.  And corrupt packets will occur if the TX/RX buffers overflow (or if there's some other logic error in the source code).
     Since the Dexter firmware is updated via this protocol mechanism, and since sending big packets to the aux AVR often results in CRC errors (see vbi_inject.h for explanation), it's especially
