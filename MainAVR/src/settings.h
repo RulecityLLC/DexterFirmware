@@ -51,6 +51,18 @@ uint8_t save_settings_to_eeprom(const void *pSrcBuf, uint16_t stBufSize);
 // common init stuff that happens after media server settings are in RAM
 void post_apply_settings();
 
+/*
+Convention:
+If a method ends in Eeprom, it means that a data array read from the EEPROM is used to complete the action.  In other words, this data is persisted across power cycles.
+If a method ends in Memory, it means that non-EEPROM data (ie normal RAM) is used to complete the action.  This data will be lost when power is cycled.
+
+Why differentiate?
+
+One reason is that Merlin-Dx can change some of these parameters dynamically, such as whether search delay is enabled or which disc is currently active.
+So we store the user's preferences in the EEPROM, where they will persist across power cycles, and we store Merlin-Dx's changes only in memory so that they do not overwrite the user's preferences.
+
+*/
+
 uint8_t IsSpinupDelayEnabledEeprom();
 LDPCDiscType_t GetDiscTypeEeprom();
 LDPType GetManualLDPTypeEeprom();	// whatever player would be manually selected if auto-detection was disabled, value saved to eeprom

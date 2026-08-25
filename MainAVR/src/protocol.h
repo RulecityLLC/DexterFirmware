@@ -4,6 +4,28 @@
 #include <ldp-abst/ldpc.h>
 #include "serial.h"
 
+/*
+These methods implement the I/O protocol documented at https://www.daphne-emu.com:9443/mediawiki/index.php/VLDP-HW#Serial_Communications
+
+In case that URL becomes unavailable, here is a brief description of the design:
+
+- Small packets are sent with a simple header and a CRC-16 footer.
+- All packets are not guaranteed to be delivered, and are idempotent.
+- If a packet fails integrity check (CRC check or length check), it is dropped by the receiver.  The sender usually does not know (or care) that the packet it sent was dropped.
+- The 'media server' in this case is the Raspberry Pi 2 (or other PC-type device) that streams video/audio.
+    The media server is only connected to the main AVR's serial lines.  To communicate with the aux AVR, it sends packets to the main AVR which then delivers them to the aux AVR (and vice versa).
+- The AVR's TX/RX buffers are not that big so they can be easily overflowed if the sender spams too much data.
+    Received packets are processed automatically by an ISR.  But nothing will stop you from overflowing the TX buffer by sending too much.  Therefore, keep logging to a minimum.
+
+Intent:
+The reason that packets are unreliable (no retry) is because tests have shown that almost all packets are delivered properly anyway, and the current design improves performance and simplifies the implementation.
+The reason for the CRC check: Early in the design, one collaborator suggested that we didn't need a CRC check at all but I'm really glad we added one.
+    The CRC check makes it easy to detect corrupt packets and drop them.  And corrupt packets will occur if the TX/RX buffers overflow (or if there's some other logic error in the source code).
+    Since the Dexter firmware is updated via this protocol mechanism, and since sending big packets to the aux AVR often results in CRC errors (see vbi_inject.h for explanation), it's especially
+      important to have a CRC check to prevent corrupt program code being stored to Dexter's flash memory.
+
+*/
+
 void io_think();
 void ProcessPacket();
 void MediaServerSendSmallBuf(unsigned char *pBuf, unsigned char u8Length);
