@@ -2,6 +2,16 @@
 #include "dexter_strings.h"
 #include <avr/pgmspace.h>
 
+/*
+Intent:
+
+PROGMEM is an AVR microcontroller keyword and macro used to store constant data in flash memory (program space) instead of SRAM.
+
+If not used, these strings would end up being stored both in flash memory AND SRAM.  As SRAM is small, we can't afford this waste of space.
+The PROGMEM keyword tells the compiler to store these strings only in flash memory.  The helper functions in this file are how the rest of the code accesses these strings.
+
+*/
+
 // IMPORTANT: keep these strings shorter than the buffer in log_string!!
 const char strDefault[] PROGMEM = "Default ";
 const char strSettingsApplied[] PROGMEM = "Settings applied";
