@@ -1,6 +1,9 @@
 #ifndef STRINGS_H
 #define STRINGS_H
 
+// The order of these enum values must correspond with the array in the corresponding .c file!
+// The reason I designed it like this (easy to break) is because I was reasonably confident I could keep it correct, and it was simple to implement.
+
 typedef enum
 {
 	STRING_DEFAULT,
@@ -60,7 +63,7 @@ typedef enum
 	STRING_DISCSWITCH_FAILED,
 	STRING_DISCSWITCH_UNKNOWN,
 	STRING_ALGMULTIROM_DETECTED,
-	STRING_COUNT	/* this must come at the end */
+	STRING_COUNT	/* this was intended to come at the end so that an array declaration could use it to size properly. I'm not finding evidence that it's actually used anywhere, though. */
 } StringID;
 
 void string_to_buf(char *s, StringID id);
