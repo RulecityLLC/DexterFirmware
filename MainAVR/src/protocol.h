@@ -11,14 +11,16 @@ In case that URL becomes unavailable, here is a brief description of the design:
 
 - Small packets are sent with a simple header and a CRC-16 footer.
 - All packets are not guaranteed to be delivered, and are idempotent.
-- If a packet fails integrity check (CRC check or length check), it is dropped by the receiver.  The sender usually does not know (or care) that the packet it sent was dropped.
+- If a packet fails integrity check (CRC check or length check), it is dropped by the receiver.  The sender does not know (or care) whether the packet it sent was dropped.
 - The 'media server' in this case is the Raspberry Pi 2 (or other PC-type device) that streams video/audio.
     The media server is only connected to the main AVR's serial lines.  To communicate with the aux AVR, it sends packets to the main AVR which then delivers them to the aux AVR (and vice versa).
-- The AVR's TX/RX buffers are not that big so they can be easily overflowed if the sender spams too much data.
-    Received packets are processed automatically by an ISR.  But nothing will stop you from overflowing the TX buffer by sending too much too quickly.  Therefore, keep logging to a minimum.
+- The AVR's TX/RX buffers are not that big so they can be easily overflowed if the sender queues too much data to be sent.
+    Received packets are processed automatically by an ISR.
+    The TX buffer also is processed automatically by an ISR, but nothing will stop you from overflowing the TX buffer by queueing up too much too quickly.  Therefore, keep logging to a minimum.
 
 Intent:
-The reason that packets are unreliable (no auto-retry) is because tests have shown that almost all packets are delivered properly anyway, and the current design improves performance and simplifies the implementation.
+The reason that packets are not guaranteed to be delivered is because of performance and simplicity (think UDP instead of TCP).
+Tests have shown that almost all packets are delivered anyway, and if a packet happens to be dropped, it's rare enough that the user usually won't even notice.
 Retry, if needed, is accomplished by the receiver expecting a packet and not getting it after a timeout period.  The receiver will then request the same packet from the sender again and repeat until it gets what it expects.
 For example, the firmware update process uses a retry method like this.
 The reason for the CRC check: Early in the design, one collaborator suggested that we didn't need a CRC check at all but I'm really glad we added one.

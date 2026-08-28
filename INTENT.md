@@ -30,13 +30,21 @@ If you want to backfill code with unit tests (which I would recommend!) follow t
 
 # Capturing the LM1881 vsync signal
 
-In the different laserdisc player modes, syncing the call to 'ldpc_OnVBlankChanged' up with the LM1881 hardware vsync may be inconsistently handled (sometimes using FIELD_PIN, sometimes using the inverse of FIELD_PIN, sometimes just toggling an internal flag).
+In the different laserdisc player modes, syncing the call to 'ldpc_OnVBlankChanged' up with the LM1881 hardware vsync may be inconsistently handled (sometimes using FIELD_PIN, sometimes using the inverse of FIELD_PIN, sometimes just toggling an internal flag).  NOTE that FIELD_PIN toggles on and off when vsync activates, so it's an convenient way to detect both vsync and what the current new video field is.
 
-If I were to pick one way of handling it that is probably the 'best', it would be the way it is handled inside ld700-main.c .  But be aware that I never performed an exhaustive study of what the correct behavior should be, so do not assume that just because the code is handling it a certain way, that that way is the best!  If you do some tests, you may find a better way!
+If I were to pick one way of handling vsync/field that is probably the 'best', it would be the way it is handled inside pr8210-main.c which is essentially:
+
+```c
+    g_u8PR8210CurField = FIELD_PIN ^ 1;
+	ldpc_OnVBlankChanged(LDPC_TRUE, g_u8PR8210CurField);
+    ldpc_OnVBlankChanged(LDPC_FALSE, g_u8PR8210CurField);
+```
+
+This approach solved an actual bug so it's probably safe to use in places where you're not sure what to use.
 
 Be careful about changing the way it's handled in timing critical modes like vp931.  It's okay to experiment with changing the behavior, just make sure you can do a hardware test to ensure Firefox's attract mode still looks correct (for example).
 
-The point is that I never really did thorough testing of whether ldpc_OnVBlankChanged should pass FIELD_PIN or the inverse of FIELD_PIN.  I just took a theoretical guess and noticed that things seemed to work.  It may be possible that either one would work.
+Some modes like ld-v1000 (currently) ignore FIELD_PIN and just toggle this the field value.  This is almost certainly not correct but I never got around to fixing it.
 
 ## Super Don Quixote
 
@@ -50,7 +58,7 @@ The aux AVR (the ATMega328p) mostly handles VBI picture number injection for PR-
 
 Due to the way this is designed, the picture number that the game sees will always be 1 field/frame behind what a real laserdisc player would have showed.  It's important to realize this limitation so that you don't wrongly assume that Dexter is more accurate than it actually is.
 
-In practice, this picture number lag doesn't seem to adversely impact game play significantly.
+In practice, this picture number lag doesn't seem to noticeably degrade game play.
 
 # Assembly language callbacks ( for example, g_pVsyncCallback )
 
